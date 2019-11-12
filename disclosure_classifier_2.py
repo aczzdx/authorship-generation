@@ -117,7 +117,15 @@ def generate_evaluation_report(pipeline, X_test=X_test, y_test=y_test):
 
 generate_evaluation_report(pipeline)
 
-#%% Print out mis-classified in the test case
+
+#%% Dump the pipeline
+
+import pickle as pkl
+with open("coi_identification_model.pkl", "wb") as f:
+    pkl.dump(pipeline, f)
+
+#%% Can this model work on funding?
+
 
 
 #%% Discarded oversampling result
