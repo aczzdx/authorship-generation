@@ -14,18 +14,11 @@ nlp = spacy.load("en_core_web_sm")
 
 #%% Get ground truth
 
-df = pd.read_csv("coi_samples.csv")
-
+df = pd.read_csv("joined.csv")
 #%% get disclosures
 
-has_disclosures = df['HasCOI']
-
-
-
-#%% Prepossessing for tokenizing the data (using the first sentence)
-doc = nlp(df['Text'][0])
-print([token.orth_ for token in doc if not (token.is_punct or token.is_space)])
-print([word.lemma_ for word in doc])
+disclosures = df['Funding Acknowledgements_before']
+real_has_disclosures = ~(df['Formatted_Funding Acknowledgements'].isna())
 
 #%% tokenizer using spacy
 from spacy.lang.en import English
@@ -48,8 +41,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 tf_idf_vectorizer = TfidfVectorizer(tokenizer=spacy_tokenizer)
 
 #%% generate labels
-label0 = [i for i in range(len(has_disclosures)) if not has_disclosures[i]]
-label1 = [i for i in range(len(has_disclosures)) if has_disclosures[i]]
+label0 = [i for i in range(len(real_has_disclosures)) if not real_has_disclosures[i]]
+label1 = [i for i in range(len(real_has_disclosures)) if real_has_disclosures[i]]
 
 print("# of authors having disclosures: {}".format(len(label1)))
 print("# of authors not having disclosures: {}".format(len(label0)))
@@ -58,7 +51,7 @@ print("# of authors: {}".format(len(df)))
 #%% Split the dataset with train-valid-test
 from sklearn.model_selection import train_test_split
 
-X_string = df['Text']
+X_string = disclosures
 Y = [0 if i in label0 else 1 for i in range(len(X_string))]
 
 X_train, X_test, y_train, y_test = train_test_split(X_string, Y, test_size=0.5, stratify=Y)
@@ -119,57 +112,5 @@ generate_evaluation_report(pipeline)
 
 #%% Print out mis-classified in the test case
 import pickle as pkl
-with open("disclosure_classifier.pkl", "wb") as f:
+with open("funding_classifier.pkl", "wb") as f:
     pkl.dump(pipeline, f)
-
-#%% Discarded oversampling result
-# #%% Experiment on Oversampling the entries with COI
-# from imblearn.over_sampling import RandomOverSampler
-# import numpy as np
-#
-# resampler = RandomOverSampler()
-# X_cleaned = StringCleaner().fit_transform(X_train, y_train)
-# X_resampled, y_resampled = resampler.fit_resample(X=np.asarray(X_cleaned).reshape((-1, 1)),
-#                                                   y=y_train)
-#
-
-
-# #%% Experiment on pipeline with oversampling
-# from sklearn.pipeline import make_pipeline
-#
-# pipeline_oversampled = make_pipeline(
-#     StringCleaner(),
-#     TfidfVectorizer(tokenizer=spacy_tokenizer),
-#     LogisticRegression()
-# )
-#
-# pipeline_oversampled.fit(pd.Series(X_resampled.reshape(-1)), pd.Series(y_resampled.reshape(-1)))
-#
-# #%% evaluation
-# generate_evaluation_report(pipeline_oversampled)
-#
-# #%% get vectorized data before augmentation
-#
-# part_pipeline_vectorized = make_pipeline(
-#     StringCleaner(),
-#     TfidfVectorizer(tokenizer=spacy_tokenizer)
-# )
-#
-# part_classifier = LogisticRegression()
-#
-# #%%
-# X_train_vectorized = part_pipeline_vectorized.fit_transform(X_train, y_train)
-#
-# #%%
-# from imblearn.over_sampling import ADASYN
-# resampler_adasyn = ADASYN()
-# X_train_vectorized_resampled, y_train_vectorized_resampled = resampler_adasyn.fit_resample(X_train_vectorized, y_train)
-#
-# #%%
-# part_classifier.fit(X_train_vectorized_resampled, y_train_vectorized_resampled)
-#
-# #%%
-# combined_pipeline = make_pipeline(part_pipeline_vectorized, part_classifier)
-#
-# #%%
-# generate_evaluation_report(combined_pipeline, X_test, y_test)
