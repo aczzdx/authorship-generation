@@ -5,9 +5,9 @@ import re
 class InitialsGenerator:
 
     def __init__(self):
-        self.last_name_tag = 'Family Name'
+        self.last_name_tag = 'Last Name'
         self.middle_initial_tag = 'Middle Initial(s)'
-        self.first_name_tag = 'Surname'
+        self.first_name_tag = 'First Name'
         self.initials_examples = {
             "Xiang-Zhen": "X-Z",
             'Jun Soo': "J-S",
@@ -175,6 +175,7 @@ class InitialsGenerator:
             l1=''.join(l.split( ))
             #l=get_first_name_initial(test,list1,s)
             fn_ii.append(l1)
+        print(fn_ii)
 
 
         #%%
@@ -233,10 +234,10 @@ class InitialsGenerator:
 
         l = []
         for i in range(len(fn_ii)):
-            initial = get_initial(fn_ii[i], m[i], ln[i])
+            initial = get_initial(fn_ii[i], m[i], ln_ii[i])
             l.append(initial)
 
-        l=get_initial(fn_ii,m,ln_ii)
+        #l=get_initial(fn_ii,m,ln_ii)
 
         def normalize_name(name):
             if not ' ' in name:
@@ -244,6 +245,10 @@ class InitialsGenerator:
             else:
                 ret = name
             return ret
+
+        first_name = df[self.first_name_tag]
+        middle_name = df[self.middle_initial_tag]
+        last_name = df[self.last_name_tag]
 
         def find_duplicate(l):
             duplicated = set()
@@ -262,7 +267,7 @@ class InitialsGenerator:
 
         num, d_initial = find_duplicate(l)
         print(num)
-        print(d_initial)
+        # print(d_initial)
 
         #%%
         fn_find = []
@@ -278,20 +283,22 @@ class InitialsGenerator:
             fni_find.append(fn_ii[num[i]])
             lni_find.append(ln_ii[num[i]])
             m_find.append(m[num[i]])
-        print(fn_find)
-        print(ln_find)
-        print(fni_find)
-        print(m_find)
-        print(lni_find)
+        #print(fn_find)
+        #print(ln_find)
+        # print(fni_find)
+        # print(m_find)
+        # print(lni_find)
 
         def full_name_find(fn_find, m_find, ln_find):
             name_find = []
             for i in range(len(fn_find)):
-                name_find.append(fn_find[i] + ' ' + m_find[i] + ' ' + ln_find[i])
+                temp_list = [fn_find[i], m_find[i], ln_find[i]]
+                temp_list = [x for x in temp_list if type(x) is str]
+                name_find.append(" ".join(temp_list))
             return name_find
 
         name_find = full_name_find(fn_find, m_find, ln_find)
-        print(name_find)
+        #print(name_find)
 
         def all_same_classification(name_find):
             duplicated_name = set()
@@ -312,10 +319,10 @@ class InitialsGenerator:
         duplicated_name, duplicated_name_num, duplicated_name_num2, duplicated_name_num3 = all_same_classification(
             name_find)
 
-        print(duplicated_name)
-        print(duplicated_name_num)
-        print(duplicated_name_num2)
-        print(duplicated_name_num3)
+        #print(duplicated_name)
+        #print(duplicated_name_num)
+        #print(duplicated_name_num2)
+        #print(duplicated_name_num3)
 
         # %%生成完全重名的人的简称
 
@@ -342,10 +349,10 @@ class InitialsGenerator:
             return new_initial_all_part1, new_initial_all_part2
 
         new_initial_all_part1, new_initial_all_part2 = all_same_initials(fni_find, m_find, lni_find)
-        print(new_initial_all_part1)
-        print(duplicated_name_num)
-        print(new_initial_all_part2)
-        print(duplicated_name_num2)
+        # print(new_initial_all_part1)
+        # print(duplicated_name_num)
+        # print(new_initial_all_part2)
+        # print(duplicated_name_num2)
         # %%222222222判断姓是否重复
         num_all = list(range(len(d_initial)))
         duplicated_name_not_num = list(set(num_all).difference(set(duplicated_name_num3)))
@@ -386,9 +393,9 @@ class InitialsGenerator:
 
         duplicated_ln_num_, fn_duplicated, ln_duplicated = find_duplicated_last_name(duplicated_name_not_num, name_find,
                                                                                      ln_find)
-        print(duplicated_ln_num_)
-        print(fn_duplicated)
-        print(ln_duplicated)
+        # print(duplicated_ln_num_)
+        # print(fn_duplicated)
+        # print(ln_duplicated)
 
         # %%生成多一位的first name
         def duplicated_first_name_initial_generation(fn_find, duplicated_ln_num_, m_find, lni_find):
@@ -406,8 +413,8 @@ class InitialsGenerator:
             return new_initial_fn
 
         new_initial_fn = duplicated_first_name_initial_generation(fn_find, duplicated_ln_num_, m_find, lni_find)
-        print(new_initial_fn)
-        print(duplicated_ln_num_)
+        # print(new_initial_fn)
+        # print(duplicated_ln_num_)
 
         # %%33333333剩下的
 
@@ -428,8 +435,8 @@ class InitialsGenerator:
             return new_initial_ln
 
         new_initial_ln = duplicated_last_name_initial_generation(fni_find, m_find, ln_find, rem)
-        print(new_initial_ln)
-        print(rem)
+        # print(new_initial_ln)
+        # print(rem)
 
         # %%
         def num_link(duplicated_name_num, duplicated_name_num2, duplicated_ln_num_, rem, num):
@@ -456,8 +463,8 @@ class InitialsGenerator:
             return num1, num2, num3, num4
 
         num1, num2, num3, num4 = num_link(duplicated_name_num, duplicated_name_num2, duplicated_ln_num_, rem, num)
-        print(num1, num2, num3, num4)
-        print(new_initial_all_part1, new_initial_all_part2, new_initial_fn, new_initial_ln)
+        # print(num1, num2, num3, num4)
+        # print(new_initial_all_part1, new_initial_all_part2, new_initial_fn, new_initial_ln)
 
         # %%
         def updated_initials(l, num1, num2, num3, num4, new_initial_all_part1, new_initial_all_part2, new_initial_fn,
@@ -470,7 +477,7 @@ class InitialsGenerator:
 
         updated_l = updated_initials(l, num1, num2, num3, num4, new_initial_all_part1, new_initial_all_part2,
                                      new_initial_fn, new_initial_ln)
-        print(updated_l)
+        # print(updated_l)
 
 
         first_name=df[self.first_name_tag]
@@ -489,7 +496,7 @@ class InitialsGenerator:
         pd.options.display.max_columns = None
 
 
-        # print(pd.DataFrame(data))
+        #print(pd.DataFrame(data))
 
         # generate_docx(l)
 
@@ -664,11 +671,11 @@ class DocGenerator:
                 paragraph.add_run(author)
 
 
+if __name__ == '__main__':
+    df = pd.read_csv("enigmaPDtestwithROLES.csv")
+    generator = InitialsGenerator()
 
-
-
-
-
-    
+    df_after = generator.transform(df)
+    df_after.to_csv("initials_output.csv")
 
 
