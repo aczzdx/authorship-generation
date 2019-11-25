@@ -171,12 +171,13 @@ def export_rows(project_id: Union[int, str], port=3333) -> Response:
 # %% working
 
 def openrefine_reconcile(input_csv: str, column_tags: List[List[str]],
-                         output_csv="output.csv", port=3333, limit_time=300):
+                         output_csv="output.csv", port=3333, limit_time=300, project_id=None):
     port_str = str(port)
 
     try:
-        project_id = create_project(input_csv)
-        print(project_id)
+        if project_id is None:
+            project_id = create_project(input_csv)
+            print(project_id)
         for country_tag, state_tag, city_tag in column_tags:
             operation_json = get_operation_json_string(country_tag, state_tag, city_tag)
             payload = (
@@ -195,15 +196,15 @@ def openrefine_reconcile(input_csv: str, column_tags: List[List[str]],
                     break
                 elif len(processing_json["processes"]) == 0:
                     break
-            # export
-            exported = export_rows(project_id, port)
 
-            if exported.status_code != 200:
-                print("Cannot get the exported result")
-            else:
-                with open(output_csv, "wb") as f:
-                    f.write(exported.content)
-                print("The normalized files has been outputted into %s" % output_csv)
+        exported = export_rows(project_id, port)
+
+        if exported.status_code != 200:
+            print("Cannot get the exported result")
+        else:
+            with open(output_csv, "wb") as f:
+                f.write(exported.content)
+            print("The normalized files has been outputted into %s" % output_csv)
 
         return project_id
     except Exception as e:
@@ -213,6 +214,6 @@ def openrefine_reconcile(input_csv: str, column_tags: List[List[str]],
 # %%
 
 if __name__ == '__main__':
-    openrefine_reconcile("enigmaPDtestwithROLES.csv", [
+    openrefine_reconcile("authors.csv", [
         ['Country', 'State', 'City (e.g.Brisbane)']
     ])

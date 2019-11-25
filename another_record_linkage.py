@@ -134,6 +134,7 @@ class DepartmentNameNormalizer:
         df_all_with_reference = linker.match_with_bloc(df_all)
 
         # merge back
+        df_to_return = df.copy()
         for i, indices in enumerate(self.address_column_indices):
             column_to_add: pd.Series = df.iloc[:, indices[0]].copy()
             for index in column_to_add.index:
@@ -143,11 +144,11 @@ class DepartmentNameNormalizer:
                         referred_i, referred_index = index_mapping[df_all_with_reference.loc[mapped_i, REFERENCE_TAG]]
                         column_to_add.at[index] = df.iloc[referred_index, self.address_column_indices[referred_i][0]]
 
-            df.insert(self.address_column_indices[i][0] + i + 1,
-                      'Reference Affiliation Name %d' % (i + 1),
-                      column_to_add)
+            df_to_return.insert(self.address_column_indices[i][0] + i + 1,
+                                'Reference Affiliation Name %d' % (i + 1),
+                                column_to_add)
 
-        return df
+        return df_to_return
 
 
 if __name__ == '__main__':
