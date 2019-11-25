@@ -30,20 +30,20 @@ def spacy_tokenizer(sentence):
     return tokens
 
 
-# %%
-import pickle as pkl
 
-with open("disclosure_classifier.pkl", "rb") as f:
-    coi_pipeline = pkl.load(f)
-
-with open("coi_identification_model.pkl", "rb") as f:
-    funding_pipeline = pkl.load(f)
 
 # %% sample code for extracting csv
 import pandas as pd
 
-
 def add_coi_and_funding_prediction(df: pd.DataFrame, coi_tag, funding_tag) -> pd.DataFrame:
+    # %%
+    import pickle as pkl
+
+    with open("disclosure_classifier.pkl", "rb") as f:
+        coi_pipeline = pkl.load(f)
+
+    with open("coi_identification_model.pkl", "rb") as f:
+        funding_pipeline = pkl.load(f)
     # df = pd.read_csv("authors.csv")
     coi_text = df[coi_tag]
     has_coi = coi_pipeline.predict_proba(coi_text)
