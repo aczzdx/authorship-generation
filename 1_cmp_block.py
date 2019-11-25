@@ -39,9 +39,9 @@ df_cleaned = df_deparments_and_address.apply(clean, axis=1)
 df_cleaned.columns = ['domain name', 'department', 'street', 'city', 'zip', 'state', 'country']
 
 # index and check
-column_names = ['street', 'city', 'zip', 'country']
+column_names = ['department', 'street', 'city', 'zip', 'country']
 df_cleaned2 = df_cleaned
-df_cleaned = df_cleaned[['street', 'city', 'zip', 'country']]
+df_cleaned = df_cleaned[['department', 'street', 'city', 'zip', 'country']]
 df_cleaned1 = df_cleaned.sort_values(by=['country', 'city'])
 indexer = rl.Index()
 
@@ -54,7 +54,7 @@ compare_cl = rl.Compare()
 for column_name in column_names:
     compare_cl.string(column_name, column_name, 'jarowinkler')
 pair_scoring = compare_cl.compute(c, df_cleaned, df_cleaned)
-pair_scoring1 = pair_scoring.iloc[:, [0, 2]]
+pair_scoring1 = pair_scoring.iloc[:, [0, 1, 3]]
 new_ground_truth = [(t[1], t[0]) for t in ground_truth]
 ground_multi = pd.MultiIndex.from_tuples(new_ground_truth)
 # %%
@@ -110,3 +110,10 @@ def get_longest_affli(tuple_list=cluster, df=df_cleaned2):
 get_longest_affli(cluster, df_cleaned2)
 
 reference = df_cleaned2.to_csv(r'address_reference.csv')
+
+#%% Dumping the ecm model
+
+import pickle as pkl
+with open("ecm.model.pkl", "wb") as f:
+    pkl.dump(ecm, f)
+

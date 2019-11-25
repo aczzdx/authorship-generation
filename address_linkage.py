@@ -4,6 +4,7 @@
 import pandas as pd
 import recordlinkage as rl
 from recordlinkage.preprocessing import clean
+import pickle as pkl
 
 
 class EmailChecking:
@@ -12,7 +13,7 @@ class EmailChecking:
         self.email_tags = ['Email Address']
 
     def transform(self, df_dirty):
-        email = df_dirty[self.email_tag].duplicated(keep=False)
+        email = df_dirty[self.email_tags].duplicated(keep=False)
         show_duplicated = df_dirty[email]
         return show_duplicated
 
@@ -22,15 +23,15 @@ class AddressLinkage:
     def __init__(self):
         self.output_clean_csv_filename = "cleaned.csv"
         self.affiliation_tags = [
-            'Affiliation 1 Department, Institution',
-            'Affiliation 2 Department, Institution',
-            'Affiliation 3 Department, Institution'
+            'Department, Institution (e.g. Psychiatric Genetics, QIMR Berghofer Medical Research Institute)',
         ]
-        self.city_tag = ['City']
+        self.city_tag = ['City (e.g. Brisbane)']
         self.country_tag = ['Country']
-        self.zip_code_tag = ['ZIP']
-        self.state_province_tag = ['State']
-        self.street_tag = ['Street']
+        self.zip_code_tag = ['ZIP or Postal Code']
+        self.state_province_tag = ['State or Province (if applicable)']
+        self.street_tag = ['Street address (e.g. 300 Herston Rd)']
+
+        self.ecm_model = None
 
     def combine_multi_affiliation(self, df1):
 
@@ -117,8 +118,8 @@ class AddressLinkage:
     # This is the main function, df1 is the open_refined csv file and df2 is the reference csv file.
     def address_linkage(self, df1, df2):
         # call get_ground_truth
-        df_cleaned = cleaning(df1)
-        ground_truth = get_ground_truth(df1=df_cleaned, df2=df2)
+        df_cleaned = self.cleaning(df1)
+        ground_truth = self.get_ground_truth(df1=df_cleaned, df2=df2)
 
         new_ground_truth = [(t[1], t[0]) for t in ground_truth]
         ground_multi = pd.MultiIndex.from_tuples(new_ground_truth)
@@ -147,15 +148,27 @@ class AddressLinkage:
 
         # use ecm_classifier
 
-        result_ecm = ecm_classifier(pair_scoring_light, ground_multi)
+        result_ecm = self.ecm_classifier(pair_scoring_light, ground_multi)
+        self.ecm_model = result_ecm
 
+        return
         # gather the same affiliation together
 
-        cluster = get_cluster(result_ecm)
+        cluster = self.get_cluster(result_ecm)
         # reference_cluster = get_cluster(ground_multi)
 
         # get the longest affiliation if ecm classifier tests them as the same departments.
 
-        df_address_reference_long = get_longest_affli(cluster, df_cleaned2)
+        df_address_reference_long = self.get_longest_affiliation_index(cluster, df_cleaned2)
         df_address_reference = df_address_reference_long[['Department', 'Reference_department']]
         return df_address_reference
+
+
+if __name__ == '__main__':
+    df_dirty = pd.read_csv("authors-csv-refine.csv")
+    df_reference = pd.read_csv("reference.csv")
+
+    linkage = AddressLinkage()
+    linkage.address_linkage(df_dirty, df_reference)
+    with open("address_record_linkage.pkl", "wb") as f:
+        pkl.dump(linkage.ecm_model, f)
