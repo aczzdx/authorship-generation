@@ -8,8 +8,9 @@ class AddressCombinator:
         self.city = 'City (e.g. Brisbane)'
         self.state = 'State'
         self.country = 'Country'
+        self.tags = [self.affiliation, self.city, self.state, self.country]
 
     def combine_address(self, row):
-        tags = [self.affiliation, self.city, self.state, self.country]
-        elements = [row[tag] for tag in tags if type(row[tag]) is str]
+
+        elements = [row[tag] for tag in self.tags if type(row[tag]) is str]
         return ", ".join(elements)
