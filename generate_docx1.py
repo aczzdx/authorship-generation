@@ -6,10 +6,7 @@ class InitialsGenerator:
 
     """Generate initials of author names
 
-    Extract initials from authors' first name, middle name and last name respectively and
-    then mix them up by some characters like '.', '-'. For some special cases, rules of
-    initials generation can be defined by users. Some examples will be shown on the UI system
-    and users can decide how to extract and combine initials and symbols
+    Extract initials from authors' first name, middle name and last name respectively and then mix them up by some characters like '.', '-'. For some special cases, rules of initials generation can be defined by users. Some examples will be shown on the UI system and users can decide how to extract and combine initials and symbols
 
     """
 
@@ -25,8 +22,7 @@ class InitialsGenerator:
         }
 
     def transform(self, df):
-        """Transform authors names to initials. Given some initial examples, the form of these
-        initials will be defined by users
+        """Transform authors names to initials. Given some initial examples, the form of these initials will be defined by users
 
         :param df: dataframe
         A dataframe with original authors information
@@ -292,8 +288,7 @@ class InitialsGenerator:
         #l=get_initial(fn_ii,m,ln_ii)
 
         def normalize_name(name):
-            """Change the first letter of first name and last name from lower case to
-            upper case
+            """Change the first letter of first name and last name from lower case to upper case
             """
             if not ' ' in name:
                 ret = name[0].upper() + name[1:].lower()
@@ -571,9 +566,7 @@ class InitialsGenerator:
 
 
 class DocGenerator:
-"""Generate a Doc file that contains a list that contains affiliation information of each
-author and a list of initials combined with the sequence number of institution that represents
-which institution each author works for
+"""Generate a Doc file that contains a list that contains affiliation information of each author and a list of initials combined with the sequence number of institution that represents which institution each author works for
 """
 
     def __init__(self):
@@ -626,8 +619,7 @@ which institution each author works for
         return affiliation_indices, set_of_affiliations
 
     def generate(self, df, initials, old_way=False):
-        """Generate a doc file that contains the author list and initials with
-        sequence number of following list
+        """Generate a doc file that contains the author list and initials with sequence number of following list
 
         :param df: dataframe
         All authors' information
