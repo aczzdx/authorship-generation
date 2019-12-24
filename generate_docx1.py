@@ -4,6 +4,12 @@ import re
 
 class InitialsGenerator:
 
+    """Generate initials of author names
+
+    Extract initials from authors' first name, middle name and last name respectively and then mix them up by some characters like '.', '-'. For some special cases, rules of initials generation can be defined by users. Some examples will be shown on the UI system and users can decide how to extract and combine initials and symbols
+
+    """
+
     def __init__(self):
         self.last_name_tag = 'Last Name'
         self.middle_initial_tag = 'Middle Initial(s)'
@@ -16,6 +22,13 @@ class InitialsGenerator:
         }
 
     def transform(self, df):
+        """Transform authors names to initials. Given some initial examples, the form of these initials will be defined by users
+
+        :param df: dataframe
+        A dataframe with original authors information
+        :return data: dataframe
+        An updated dataframe with authors information that adds one column of generated initials
+        """
 
         first_name = df[self.first_name_tag]
         middle_name = df[self.middle_initial_tag]
@@ -25,18 +38,32 @@ class InitialsGenerator:
             df[tag] = df[tag].apply(lambda name: name.strip() if not pd.isnull(name) else name)
 
         def get_first_name(first_name):
+            """Extract initials and special symbols from authors first name in the dataframe
+
+            :param first_name: string
+            First name of each author in the dataframe
+
+            :return l: string
+            Extracted initials and special symbols
+            """
             if '-' in first_name:
-                l1 = first_name.split('-')
-                l = ''.join(['-'.join(l[0] for l in l1)])
+                l = ''.join(['-'.join(l[0] for l in first_name.split('-'))])
             elif ' ' in first_name:
-                l1 = first_name.split(' ')
-                l = ''.join([' '.join(l[0] for l in l1)])
+                l = ''.join([' '.join(l[0] for l in first_name.split(' '))])
             else:
                 l = first_name[0].upper()
 
             return l
 
         def get_middle(middle_initial):
+            """Extract initials and special symbols from authors middle initials in the dataframe
+
+            :param middle_initial: string
+            Middle initials of each author in the dataframe
+
+            :return: result: string
+            Extracted initials and special symbols
+            """
             if pd.isnull(middle_initial):
                 return middle_initial
             else:
@@ -46,14 +73,19 @@ class InitialsGenerator:
                 else:
                     return result
 
-
         def get_last_name(last_name):
+            """Extract initials and special symbols from authors last name in the dataframe
+
+            :param last_name: string
+            Last name of each author in the dataframe
+
+            :return: l: string
+             Extracted initials and special symbols
+            """
             if '-' in last_name:
-                l1 = last_name.split('-')
-                l = ''.join(['-'.join(l[0] for l in l1)])
+                l = ''.join(['-'.join(l[0] for l in last_name.split('-'))])
             elif ' ' in last_name:
-                l1 = last_name.split(' ')
-                l = ''.join([' '.join(l[0] for l in l1)])
+                l = ''.join([' '.join(l[0] for l in last_name.split(' '))])
             else:
                 l = last_name[0].upper()
 
@@ -88,11 +120,21 @@ class InitialsGenerator:
 
 
         def get_first_name_initial(first_name, test1, s1):
+            """Combine initials and symbols of authors first name
+
+            :param first_name: string
+            First name of each author in the dataframe
+            :param test1: list
+            A list of integer representing the locations of symbol '.'
+            :param s1: string
+            A symbol that replaces the space in first name initials
+            :return fn_i: string
+            First name initials of each author in the dataframe
+            """
             fn_i = []
             if not len(first_name) == 1:
                 for j in range(len(first_name)):
                     if '-' in first_name:
-
                         if j in test1:
                             l = first_name[j] + '.'
                         else:
@@ -109,8 +151,18 @@ class InitialsGenerator:
 
             return fn_i
 
-
         def get_last_name_initial(last_name, test2, s2):
+            """Combine initials and symbols of authors last name
+
+            :param last_name: string
+            Last name of each author in the dataframe
+            :param test2: list
+            A list of integer representing the locations of symbol '.'
+            :param s2: string
+            A symbol that replaces the space in first name initials
+            :return ln_i: string
+            Last name initials of each author in the dataframe
+            """
             ln_i = []
             if not len(last_name) == 1:
                 for j in range(len(last_name)):
@@ -173,7 +225,6 @@ class InitialsGenerator:
             first_name=list1[i]['First name']
             l=''.join(get_first_name_initial(first_name,test1,s1))
             l1=''.join(l.split( ))
-            #l=get_first_name_initial(test,list1,s)
             fn_ii.append(l1)
         print(fn_ii)
 
@@ -211,8 +262,6 @@ class InitialsGenerator:
             else:
                 s2=''
 
-
-
         #%%
         ln_ii = []
         for i in range(len(df)):
@@ -222,7 +271,6 @@ class InitialsGenerator:
             # l=get_last_name_initial(test2,list1,s2)
             ln_ii.append(l)
 
-        # ln_ii
 
         def get_initial(fn, m, ln):
             ret = fn + '.'
@@ -240,6 +288,8 @@ class InitialsGenerator:
         #l=get_initial(fn_ii,m,ln_ii)
 
         def normalize_name(name):
+            """Change the first letter of first name and last name from lower case to upper case
+            """
             if not ' ' in name:
                 ret = name[0].upper() + name[1:].lower()
             else:
@@ -251,6 +301,15 @@ class InitialsGenerator:
         last_name = df[self.last_name_tag]
 
         def find_duplicate(l):
+            """Find out authors name that has the same initials
+
+            :param l: string
+            Initials of each author
+            :return num: list
+            A list of the sequence number of duplicated initials
+            :return d_initial: list
+            A list of duplicated initials
+            """
             duplicated = set()
             num = []
             d_initial = []
@@ -266,8 +325,6 @@ class InitialsGenerator:
             return num, d_initial
 
         num, d_initial = find_duplicate(l)
-        print(num)
-        # print(d_initial)
 
         #%%
         fn_find = []
@@ -283,13 +340,11 @@ class InitialsGenerator:
             fni_find.append(fn_ii[num[i]])
             lni_find.append(ln_ii[num[i]])
             m_find.append(m[num[i]])
-        #print(fn_find)
-        #print(ln_find)
-        # print(fni_find)
-        # print(m_find)
-        # print(lni_find)
 
         def full_name_find(fn_find, m_find, ln_find):
+            """Find out all full name that has same initials
+
+            """
             name_find = []
             for i in range(len(fn_find)):
                 temp_list = [fn_find[i], m_find[i], ln_find[i]]
@@ -327,6 +382,13 @@ class InitialsGenerator:
         # %%生成完全重名的人的简称
 
         def all_same_initials(fni_find, m_find, lni_find):
+            """Find out the initials that are exactly the same
+
+            :param fni_find:
+            :param m_find:
+            :param lni_find:
+            :return:
+            """
             new_initial_all_part1 = []
             new_initial_all_part2 = []
             for i in range(len(fni_find)):
@@ -504,7 +566,8 @@ class InitialsGenerator:
 
 
 class DocGenerator:
-
+"""Generate a Doc file that contains a list that contains affiliation information of each author and a list of initials combined with the sequence number of institution that represents which institution each author works for
+"""
 
     def __init__(self):
         self.output_doc_filename = "demo2.docx"
@@ -528,6 +591,17 @@ class DocGenerator:
         ]
 
     def get_indices_of_affiliations(self, df, affiliation_tags):
+        """Extract indices and information of affilations in dataframe
+
+        :param df: dataframe
+        All authors' information
+        :param affiliation_tags: list
+        Column name of affiliation in dataframe
+        :return affiliation_indices: object
+        Indices of affiliations
+        :return set_of_affiliation: set
+        Affiliation of each author without duplication
+        """
 
         df_affiliations = df[affiliation_tags].T
         list_of_affiliations = pd.concat([df_affiliations[name] for name in df_affiliations.columns], axis=0)
@@ -545,7 +619,13 @@ class DocGenerator:
         return affiliation_indices, set_of_affiliations
 
     def generate(self, df, initials, old_way=False):
-        # %%
+        """Generate a doc file that contains the author list and initials with sequence number of following list
+
+        :param df: dataframe
+        All authors' information
+        :param initials: string
+        Initials of each author
+        """
         x = df[self.whole_name]
 
         i_inform = []
@@ -613,7 +693,18 @@ class DocGenerator:
             self.generate_doc_content(df, affiliation_indices, set_of_affiliations, initials)
 
     def generate_doc_content(self, df, affiliation_indices, set_of_affiliations, initials):
-        from docx import Document
+        """Generate the content of the doc file
+
+        :param df: dataframe
+        All authors' information
+        :param affiliation_indices: object
+        Indices of affiliations
+        :param set_of_affiliations: set
+        Affiliation of each author without duplication
+        :param initials: list
+        List of initials of all authors
+        """
+     from docx import Document
         document = Document()
         self.generate_authorlist(affiliation_indices, df, document, set_of_affiliations)
         if self.role_tag is not None:
@@ -622,6 +713,17 @@ class DocGenerator:
         document.save(self.output_doc_filename)
 
     def generate_authorlist(self, affiliation_indices, df, document, set_of_affiliations):
+        """Add an authorlist in the exsiting doc file
+
+        :param affiliation_indices: object
+        Indices of affiliations
+        :param df: dataframe
+        All authors' information
+        :param document:
+        Existing doc file that generated before
+        :param set_of_affiliations: set
+        Affiliation of each author without duplication
+        """
         document.add_heading('Authorlist', level=2)
         p = document.add_paragraph('')
         x = df[self.whole_name]
@@ -636,6 +738,15 @@ class DocGenerator:
             document.add_paragraph(set_of_affiliations[j], style='List Number')
 
     def generate_contribution_list(self, df, document, initials):
+        """Add a author contribution list in the existing file
+
+        :param df: dataframe
+        All authors' information
+        :param document:
+        Existing doc file that generated before
+        :param initials: list
+        List of initials of all authors
+        """
         flatten = lambda l: [item for sublist in l for item in sublist]
 
         roles = df[self.role_tag].apply(lambda x: re.split(r"\s*[;]\s*", x))
