@@ -23,7 +23,10 @@ class AddressLinkage:
             same as what they have written.
     """
     def __init__(self) -> None:
-        """Init Dataframe title tags with address, department, city, country, zip"""
+        """Init Dataframe title tags with address, department, city, country, zip
+
+        :return: None
+        """
         self.address_tag = "street"
         self.department_tag = "department"
         self.city_tag = "city"
@@ -37,20 +40,21 @@ class AddressLinkage:
             self.ecm = pkl.load(f)
 
     @property
-    def tags(self) -> list:
+    def tags(self) -> List[str]:
         """Reassign titles in Pandas Dataframe"""
         return [self.department_tag,
                 self.address_tag, self.city_tag, self.zip_tag,
                 self.country_tag]
 
     @staticmethod
-    def get_cluster(tuple_list: List[Tuple[int, int]]) -> list:
+    def get_cluster(tuple_list: List[Tuple[int, int]]) -> List[Tuple]:
         """Cluster authors who have the same affiliations, detected by ECM model
 
         Gather the same numbers in different tuples(all in a list) and combine those in the same tuples into a
         new one.
         Note that it is a static function.
-
+        :param tuple_list: Record linkage results by ECM classifier
+        :return: Re-cluster tuple_list as record linkage results
         """
         cluster = []
         for i in tuple_list:
@@ -70,18 +74,22 @@ class AddressLinkage:
                 cluster.append(i)
         return cluster
 
-    def get_longest_affiliation_index(self, tuple_list: List[Tuple[int, int]],
+    def get_longest_affiliation_index(self, cluster: List[Tuple],
                                       df: pd.DataFrame) -> pd.DataFrame:
-        """Track the longest affiliation name filled by co-authors."""
+        """Track the longest affiliation name filled by co-authors.
+        :param cluster: Re-cluster tuple_list as record linkage results, return value in get_cluster function
+        :param df: Dataframe converted by .csv file
+        :return: Dataframe added with REFERENCE_TAG column, only writing in cells in param cluster
+        """
         df[REFERENCE_TAG] = None
-        for i in range(len(tuple_list)):
+        for i in range(len(cluster)):
             list1 = []
-            for j in range(len(tuple_list[i])):
-                list1.append(df[self.department_tag][tuple_list[i][j]])
+            for j in range(len(cluster[i])):
+                list1.append(df[self.department_tag][cluster[i][j]])
 
             sort_list = [len(one) for one in list1]
-            max_index = tuple_list[i][sort_list.index(max(sort_list))]
-            for j in tuple_list[i]:
+            max_index = cluster[i][sort_list.index(max(sort_list))]
+            for j in cluster[i]:
                 longest_str = max_index
                 df.at[j, REFERENCE_TAG] = longest_str
 
@@ -93,6 +101,8 @@ class AddressLinkage:
         Main function in class Addresslinkage. Index authors records by country and city,
         compare record with all other authors, and fill the reference column either by the
         longest affiliation names (we assume they are right) or by what they have shown.
+        :param df: Dataframe converted by .csv file
+        :return: Dataframe added with affiliation reference column, writing in all cells
         """
         indexer = rl.Index()
         indexer.block(left_on=[self.country_tag, self.city_tag])
@@ -140,6 +150,8 @@ class DepartmentNameNormalizer:
 
         Main function in Class DepartmentNameNormalizer, extract address and mapping to fit for the format in
         AddressLinkage, then merge back to create the reference column.
+        :param df: Dataframe converted by .csv file
+        :return: Dataframe with reference in column REFERENCE_TAG
         """
         self.address_column_indices: List[List[int]]
         self.address_column_indices.sort()
