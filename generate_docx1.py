@@ -566,8 +566,8 @@ class InitialsGenerator:
 
 
 class DocGenerator:
-"""Generate a Doc file that contains a list that contains affiliation information of each author and a list of initials combined with the sequence number of institution that represents which institution each author works for
-"""
+    """Generate a Doc file that contains a list that contains affiliation information of each author and a list of initials combined with the sequence number of institution that represents which institution each author works for
+    """
 
     def __init__(self):
         self.output_doc_filename = "demo2.docx"
@@ -704,7 +704,7 @@ class DocGenerator:
         :param initials: list
         List of initials of all authors
         """
-     from docx import Document
+        from docx import Document
         document = Document()
         self.generate_authorlist(affiliation_indices, df, document, set_of_affiliations)
         if self.role_tag is not None:
