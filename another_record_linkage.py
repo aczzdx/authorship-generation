@@ -36,7 +36,7 @@ class AddressLinkage:
         # load the pre-trained model
         import pickle as pkl
 
-        with open("ecm.model.pkl", "rb") as f:
+        with open("models/ecm.model.pkl", "rb") as f:
             self.ecm = pkl.load(f)
 
     @property
@@ -198,7 +198,7 @@ class DepartmentNameNormalizer:
 
 
 if __name__ == '__main__':
-    df1 = pd.read_csv("authors-csv-refine.csv")
+    df1 = pd.read_csv("data/authors-csv-refine.csv")
     normalizer = DepartmentNameNormalizer()
     df_referred = normalizer.give_reference(df1)
 

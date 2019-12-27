@@ -14,7 +14,7 @@ nlp = spacy.load("en_core_web_sm")
 
 #%% Get ground truth
 
-df = pd.read_csv("coi_samples.csv")
+df = pd.read_csv("data/coi_samples.csv")
 
 #%% get disclosures
 
@@ -119,7 +119,7 @@ generate_evaluation_report(pipeline)
 
 #%% Print out mis-classified in the test case
 import pickle as pkl
-with open("disclosure_classifier.pkl", "wb") as f:
+with open("models/disclosure_classifier.pkl", "wb") as f:
     pkl.dump(pipeline, f)
 
 
