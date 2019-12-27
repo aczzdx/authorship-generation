@@ -112,5 +112,5 @@ generate_evaluation_report(pipeline)
 
 #%% Print out mis-classified in the test case
 import pickle as pkl
-with open("funding_classifier.pkl", "wb") as f:
+with open("models/funding_classifier.pkl", "wb") as f:
     pkl.dump(pipeline, f)

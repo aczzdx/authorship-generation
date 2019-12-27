@@ -11,8 +11,8 @@ import sklearn
 
 # %% Get ground truth list
 
-df1 = pd.read_csv("authors-csv-refine.csv")
-df2 = pd.read_csv("reference.csv")
+df1 = pd.read_csv("../data/authors-csv-refine.csv")
+df2 = pd.read_csv("../reference.csv")
 
 name = np.nan
 for tag in ['Email Address']:
@@ -114,6 +114,6 @@ reference = df_cleaned2.to_csv(r'address_reference.csv')
 #%% Dumping the ecm model
 
 import pickle as pkl
-with open("ecm.model.pkl", "wb") as f:
+with open("../models/ecm.model.pkl", "wb") as f:
     pkl.dump(ecm, f)
 

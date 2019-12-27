@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv("authors.csv")
+df = pd.read_csv("data/authors.csv")
 first_name = df['First Name']
 middle_name = df['Middle Initial(s)']
 last_name = df['Last Name']

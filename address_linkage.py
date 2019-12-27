@@ -165,7 +165,7 @@ class AddressLinkage:
 
 
 if __name__ == '__main__':
-    df_dirty = pd.read_csv("authors-csv-refine.csv")
+    df_dirty = pd.read_csv("data/authors-csv-refine.csv")
     df_reference = pd.read_csv("reference.csv")
 
     linkage = AddressLinkage()

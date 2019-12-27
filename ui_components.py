@@ -18,7 +18,7 @@ import ipywidgets as widgets
 import io
 from IPython.display import display
 from typing import Optional, Literal, Type, Union
-from generate_docx1 import InitialsGenerator, DocGenerator
+from generate_docx import InitialsGenerator, DocGenerator
 from utils import AddressCombinator
 from openrefine_caller import openrefine_reconcile, create_project
 import pandas as pd
