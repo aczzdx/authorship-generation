@@ -33,10 +33,10 @@ def spacy_tokenizer(sentence):
 # %%
 import pickle as pkl
 
-with open("models/disclosure_classifier.pkl", "rb") as f:
+with open("../models/disclosure_classifier.pkl", "rb") as f:
     coi_pipeline = pkl.load(f)
 
-with open("models/coi_identification_model.pkl", "rb") as f:
+with open("../models/coi_identification_model.pkl", "rb") as f:
     funding_pipeline = pkl.load(f)
 
 # %% sample code for extracting csv

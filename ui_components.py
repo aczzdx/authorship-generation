@@ -446,7 +446,7 @@ class CleaningTab:
     def propose_data(self) -> None:
         """ Callback function for adding new columns predicting the existence of COI or funding statement
         """
-        from another_record_linkage import DepartmentNameNormalizer
+        from address_linkage import DepartmentNameNormalizer
         from annotator import add_coi_and_funding_prediction
 
         mydict = self.affiliation_upload.value
