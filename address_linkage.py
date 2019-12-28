@@ -1,84 +1,61 @@
-#%% This function requires a refined dataframe and a reference dataframe
-
+#%%
+from typing import List, Tuple
 
 import pandas as pd
 import recordlinkage as rl
-from recordlinkage.preprocessing import clean
-import pickle as pkl
+import recordlinkage.preprocessing
 
-
-class EmailChecking:
-
-    def __init__(self):
-        self.email_tags = ['Email Address']
-
-    def transform(self, df_dirty):
-        email = df_dirty[self.email_tags].duplicated(keep=False)
-        show_duplicated = df_dirty[email]
-        return show_duplicated
+REFERENCE_TAG = 'reference_department'
 
 
 class AddressLinkage:
+    """Link the same address between every co-author.
 
-    def __init__(self):
-        self.output_clean_csv_filename = "cleaned.csv"
-        self.affiliation_tags = [
-            'Department, Institution (e.g. Psychiatric Genetics, QIMR Berghofer Medical Research Institute)',
-        ]
-        self.city_tag = ['City (e.g. Brisbane)']
-        self.country_tag = ['Country']
-        self.zip_code_tag = ['ZIP or Postal Code']
-        self.state_province_tag = ['State or Province (if applicable)']
-        self.street_tag = ['Street address (e.g. 300 Herston Rd)']
+    Gather the clusters with index of the same address detected by the pre-trained model, and bond
+    preferred values(the longest affiliation name) with these clusters.
 
-        self.ecm_model = None
+    Attributes:
+        tags: A list with tags defined by user
+        get_cluster: A list with tuples insides, indicating authors who have the same affiliations.
+        get_longest_affiliation_index: A Pandas.Dataframe with an extra column added, and authors who
+            are in clusters are given the reference with the longest affiliation name.
+        match_with_bloc: A Pandas.Dataframe with extra column added, the entire authors are filled the
+            same as what they have written.
+    """
+    def __init__(self) -> None:
+        """Init Dataframe title tags with address, department, city, country, zip
 
-    def combine_multi_affiliation(self, df1):
+        :return: None
+        """
+        self.address_tag = "street"
+        self.department_tag = "department"
+        self.city_tag = "city"
+        self.country_tag = "country"
+        self.zip_tag = "zip"
 
+        # load the pre-trained model
+        import pickle as pkl
 
-        return
+        with open("models/ecm.model.pkl", "rb") as f:
+            self.ecm = pkl.load(f)
 
-    def cleaning(self, df_dirty):
-        affiliation = df_dirty[self.affiliation_tags[0]]
-        street = df_dirty[self.street_tag]
-        city = df_dirty[self.city_tag]
-        zip = df_dirty[self.zip_code_tag]
-        state = df_dirty[self.state_province_tag]
-        country = df_dirty[self.country_tag]
+    @property
+    def tags(self) -> List[str]:
+        """Reassign titles in Pandas Dataframe"""
+        return [self.department_tag,
+                self.address_tag, self.city_tag, self.zip_tag,
+                self.country_tag]
 
-        df_deparments_and_address = df_dirty.iloc[:, [affiliation, street, city, zip, state, country]]
-        df_cleaned0 = df_deparments_and_address.apply(clean, axis=1)
-        df_cleaned = pd.concat([df_dirty['Email Address'], df_cleaned0], axis=1)
+    @staticmethod
+    def get_cluster(tuple_list: List[Tuple[int, int]]) -> List[Tuple]:
+        """Cluster authors who have the same affiliations, detected by ECM model
 
-        return df_cleaned
-
-    def get_ground_truth(self, df1, df2):
-        df1.columns = df1.columns + '_before'
-
-        df_combine = df1.merge(df2, how='left', left_on='Email Address_before', right_on='Email Address')
-        df_combine.duplicated()
-        ground_truth = []
-        df_aff = df_combine['Affiliation 1 Department, Institution']
-
-        for i in range(len(df_aff)):
-            j = i + 1
-            while j <= len(df_aff) - 1:
-                if df_aff[i] == df_aff[j]:
-                    ground_truth.append((i, j))
-                j = j + 1
-
-        return ground_truth
-
-    def ecm_classifier(self, index, truth):
-        ecm = rl.ECMClassifier(binarize=0.67)
-        result_ecm = ecm.fit_predict(index)
-        a = rl.precision(truth, result_ecm)
-        b = rl.recall(truth, result_ecm)
-        print("precision = ", a)
-        print("recall = ", b)
-        return result_ecm
-
-    def get_cluster(self, tuple_list):
+        Gather the same numbers in different tuples(all in a list) and combine those in the same tuples into a
+        new one.
+        Note that it is a static function.
+        :param tuple_list: Record linkage results by ECM classifier
+        :return: Re-cluster tuple_list as record linkage results
+        """
         cluster = []
         for i in tuple_list:
             flag = 0
@@ -97,78 +74,132 @@ class AddressLinkage:
                 cluster.append(i)
         return cluster
 
-    def get_longest_affli(self, tuple_list, df):
-        df['Reference_department'] = None
-        for i in range(len(tuple_list)):
+    def get_longest_affiliation_index(self, cluster: List[Tuple],
+                                      df: pd.DataFrame) -> pd.DataFrame:
+        """Track the longest affiliation name filled by co-authors.
+        :param cluster: Re-cluster tuple_list as record linkage results, return value in get_cluster function
+        :param df: Dataframe converted by .csv file
+        :return: Dataframe added with REFERENCE_TAG column, only writing in cells in param cluster
+        """
+        df[REFERENCE_TAG] = None
+        for i in range(len(cluster)):
             list1 = []
-            for j in range(len(tuple_list[i])):
-                sort_list = []
-                list1.append(df['Department'][tuple_list[i][j]])
+            for j in range(len(cluster[i])):
+                list1.append(df[self.department_tag][cluster[i][j]])
 
             sort_list = [len(one) for one in list1]
-            max_index = tuple_list[i][sort_list.index(max(sort_list))]
-            for j in tuple_list[i]:
-                longest_str = df['Department'][max_index]
-                df1 = df.set_value(j, 'Reference_department', longest_str)
-        for i in range(len(df1['Reference_department'])):
-            if df1['Reference_department'][i] == None:
-                df1['Reference_department'][i] = df1['Department'][i]
-        return df1
+            max_index = cluster[i][sort_list.index(max(sort_list))]
+            for j in cluster[i]:
+                longest_str = max_index
+                df.at[j, REFERENCE_TAG] = longest_str
 
-    # This is the main function, df1 is the open_refined csv file and df2 is the reference csv file.
-    def address_linkage(self, df1, df2):
-        # call get_ground_truth
-        df_cleaned = self.cleaning(df1)
-        ground_truth = self.get_ground_truth(df1=df_cleaned, df2=df2)
+        return df
 
-        new_ground_truth = [(t[1], t[0]) for t in ground_truth]
-        ground_multi = pd.MultiIndex.from_tuples(new_ground_truth)
+    def match_with_bloc(self, df: pd.DataFrame) -> pd.Dataframe:
+        """Record linkage to all university addresses, and return a Dataframe with reference.
 
-        # rename columns
-        # df1.columns = ['domain name', 'department', 'street', 'city', 'zip', 'state', 'country']
-
-        # index and check
-
-        column_names = ['Street', 'City', 'Zip', 'Country']
-        df_cleaned2 = df_cleaned
-        df_cleaned = df_cleaned[['Street', 'City', 'Zip', 'Country']]
-        df_cleaned1 = df_cleaned.sort_values(by=['Country', 'City'])
+        Main function in class Addresslinkage. Index authors records by country and city,
+        compare record with all other authors, and fill the reference column either by the
+        longest affiliation names (we assume they are right) or by what they have shown.
+        :param df: Dataframe converted by .csv file
+        :return: Dataframe added with affiliation reference column, writing in all cells
+        """
         indexer = rl.Index()
-
-        indexer.block(left_on=['Country', 'City'])
-        c = indexer.index(df_cleaned1)
-
-        # compare record
+        indexer.block(left_on=[self.country_tag, self.city_tag])
+        c = indexer.index(df)
 
         compare_cl = rl.Compare()
-        for column_name in column_names:
-            compare_cl.string(column_name, column_name, 'jarowinkler')
-        pair_scoring = compare_cl.compute(c, df1, df1)
-        pair_scoring_light = pair_scoring.iloc[:, [0, 2]]
+        for cname in self.tags:
+            compare_cl.string(cname, cname, 'jarowinkler')
 
-        # use ecm_classifier
+        pair_scoring = compare_cl.compute(c, df, df)
+        pair_scoring = pair_scoring.iloc[:, [0, 1, 3]]
 
-        result_ecm = self.ecm_classifier(pair_scoring_light, ground_multi)
-        self.ecm_model = result_ecm
-
-        return
-        # gather the same affiliation together
+        self.ecm: rl.ECMClassifier
+        result_ecm = self.ecm.predict(pair_scoring)
 
         cluster = self.get_cluster(result_ecm)
-        # reference_cluster = get_cluster(ground_multi)
+        df = self.get_longest_affiliation_index(cluster, df)
 
-        # get the longest affiliation if ecm classifier tests them as the same departments.
+        # clear reference
+        reference_is_null = df[REFERENCE_TAG].isnull()
+        df.loc[reference_is_null, REFERENCE_TAG] = df.loc[reference_is_null].index
 
-        df_address_reference_long = self.get_longest_affiliation_index(cluster, df_cleaned2)
-        df_address_reference = df_address_reference_long[['Department', 'Reference_department']]
-        return df_address_reference
+        return df
+
+
+class DepartmentNameNormalizer:
+    """Split author who have multiple affiliations and merge back to give reference to all department name.
+
+    Call functions from AddressLinkage and return a Pandas.Dataframe with an extra column, showing all the
+    references.
+
+    Attributes:
+        give_reference: A Pandas.Dataframe with one more column, giving all the references to be checked by user.
+
+    """
+    def __init__(self) -> None:
+        """Init Dataframe columns' index to be read"""
+        self.address_column_indices = [
+            [7, 8, 9, 10, 12],
+            [13, 14, 15, 16, 18]
+        ]
+
+    def give_reference(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Deal with co-authors with two affiliations, split and merge back them fit Class AddressLinkage.
+
+        Main function in Class DepartmentNameNormalizer, extract address and mapping to fit for the format in
+        AddressLinkage, then merge back to create the reference column.
+        :param df: Dataframe converted by .csv file
+        :return: Dataframe with reference in column REFERENCE_TAG
+        """
+        self.address_column_indices: List[List[int]]
+        self.address_column_indices.sort()
+
+        linker = AddressLinkage()
+
+        # extract only address and mapping
+        index_mapping = dict()
+        index_mapping_inv = dict()
+        num_records = 0
+        extracted: List[pd.DataFrame] = []
+
+        for i, indices in enumerate(self.address_column_indices):
+            extracted.append(df.iloc[:, indices][~df.iloc[:, indices[0]].isnull()])
+            for index in extracted[i].index:
+                index_mapping[num_records] = (i, index)
+                index_mapping_inv[(i, index)] = num_records
+                num_records += 1
+            extracted[i].columns = linker.tags
+
+        df_all = pd.concat(extracted, axis=0, ignore_index=True)
+        df_all.apply(recordlinkage.preprocessing.clean, axis=1)
+
+        # record linkage
+
+        df_all_with_reference = linker.match_with_bloc(df_all)
+
+        # merge back
+        df_to_return = df.copy()
+        for i, indices in enumerate(self.address_column_indices):
+            column_to_add: pd.Series = df.iloc[:, indices[0]].copy()
+            for index in column_to_add.index:
+                if (i, index) in index_mapping_inv:
+                    mapped_i = index_mapping_inv[(i, index)]
+                    if df_all_with_reference.loc[mapped_i, REFERENCE_TAG] is not None:
+                        referred_i, referred_index = index_mapping[df_all_with_reference.loc[mapped_i, REFERENCE_TAG]]
+                        column_to_add.at[index] = df.iloc[referred_index, self.address_column_indices[referred_i][0]]
+
+            df_to_return.insert(self.address_column_indices[i][0] + i + 1,
+                                'Reference Affiliation Name %d' % (i + 1),
+                                column_to_add)
+
+        return df_to_return
 
 
 if __name__ == '__main__':
-    df_dirty = pd.read_csv("data/authors-csv-refine.csv")
-    df_reference = pd.read_csv("reference.csv")
+    df1 = pd.read_csv("data/authors-csv-refine.csv")
+    normalizer = DepartmentNameNormalizer()
+    df_referred = normalizer.give_reference(df1)
 
-    linkage = AddressLinkage()
-    linkage.address_linkage(df_dirty, df_reference)
-    with open("address_record_linkage.pkl", "wb") as f:
-        pkl.dump(linkage.ecm_model, f)
+    df_referred.to_csv("another_test.csv")
