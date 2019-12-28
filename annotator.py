@@ -1,49 +1,24 @@
-# %%
-from sklearn.base import TransformerMixin
-
-
-class StringCleaner(TransformerMixin):
-
-    def transform(self, X, **transform_params):
-        return ["None" if type(s) is not str else s for s in X]
-
-    def fit(self, X, y=None, **fit_params):
-        return self
-
-    def get_params(self, deep=True):
-        return {}
-
-
-# %%
-
-from spacy.lang.en import English
-import string
-
-parser = English()
-punctuation = string.punctuation
-
-
-def spacy_tokenizer(sentence):
-    tokens = [word.lemma_.lower().strip() if word.lemma_ != "-PRON-" else word.lower_ for word in parser(sentence)]
-    tokens = [token for token in tokens if not (token in punctuation)]
-
-    return tokens
-
-
-
-
-# %% sample code for extracting csv
 import pandas as pd
 
-def add_coi_and_funding_prediction(df: pd.DataFrame, coi_tag, funding_tag) -> pd.DataFrame:
-    # %%
+
+def add_coi_and_funding_prediction(df: pd.DataFrame, coi_tag: str, funding_tag: str) -> pd.DataFrame:
+    """ Append columns of predicting COI and funding back to the data frame
+    :param df: The source data frame
+    :param coi_tag: The column name for COI (Conflict of Interests)
+    :param funding_tag: The column name for funding statement
+    :return: The modified data frame
+    """
     import pickle as pkl
+    from disclosure_classifier import ClassifierWrapper
 
     with open("models/disclosure_classifier.pkl", "rb") as f:
-        coi_pipeline = pkl.load(f)
+        coi_pipeline_wrapper: ClassifierWrapper = pkl.load(f)
+        coi_pipeline = coi_pipeline_wrapper.pipeline
 
     with open("models/coi_identification_model.pkl", "rb") as f:
-        funding_pipeline = pkl.load(f)
+        funding_pipeline_wrapper: ClassifierWrapper = pkl.load(f)
+        funding_pipeline = funding_pipeline_wrapper.pipeline
+
     # df = pd.read_csv("authors.csv")
     coi_text = df[coi_tag]
     has_coi = coi_pipeline.predict_proba(coi_text)
