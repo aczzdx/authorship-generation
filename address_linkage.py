@@ -1,4 +1,3 @@
-#%%
 from typing import List, Tuple
 
 import pandas as pd
@@ -6,6 +5,26 @@ import recordlinkage as rl
 import recordlinkage.preprocessing
 
 REFERENCE_TAG = 'reference_department'
+
+
+class EmailChecking:
+    """Check the duplicate submission by checking the Email
+
+    If there are multiple entries submitted from the same email address,
+    they must be duplicated.
+    """
+
+    def __init__(self):
+        self.email_tags = ['Email Address']
+
+    def transform(self, df_dirty: pd.DataFrame) -> pd.DataFrame:
+        """ Extract the rows that having same
+        :param df_dirty: The source data frame
+        :return: Extracted data frame contains mutliple submission only
+        """
+        email = df_dirty[self.email_tags].duplicated(keep=False)
+        show_duplicated = df_dirty[email]
+        return show_duplicated
 
 
 class AddressLinkage:
