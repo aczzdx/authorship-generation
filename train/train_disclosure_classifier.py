@@ -1,6 +1,6 @@
 if __name__ == '__main__':
     import pickle as pkl
-    from disclosure_classifier import ClassifierWrapper
+    from statement_classifier import ClassifierWrapper
     import pandas as pd
 
     pipeline = ClassifierWrapper()
