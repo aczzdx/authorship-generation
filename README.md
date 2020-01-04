@@ -14,18 +14,25 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
 2. Once creating the Vitual Environment, you could use a simple ``` pip ``` command:
 
     ```pip install <package name>```
+    Python packages are including: spacy, ipywidgets, recordlinkage, sklearn, python-docx
 
-    Python packages are including: 
-spacy, ipywidgets, recordlinkage, sklearn, python-docx
+    Or just run 
 
-Or just run 
-
-```pip install -r requirements.txt```
+    ```pip install -r requirements.txt```
 
 3. Download OpenRefine 3.2 in openrefine.org
+
 ## Usage
+
 - For GUI, open GUI.ipynb by jupyter notebook, then run the cells.
-- Provide json for regular use, save all your configuations.
+
+- For generating the author information, we can just use the CLI tools with the CLI interface.
+  Please check the configuration template `config.yml` to learn more about the parameters.
+  
+  To run the generation task, please run
+  
+  ```  python authorship_tools.py generate config.yml   ```
+  
 ## Features
 
 ### Data Cleaning
