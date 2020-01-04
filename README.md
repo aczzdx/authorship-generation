@@ -18,6 +18,10 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
     Python packages are including: 
 spacy, ipywidgets, recordlinkage, sklearn, python-docx
 
+Or just run 
+
+```pip install -r requirements.txt```
+
 3. Download OpenRefine 3.2 in openrefine.org
 ## Usage
 - For GUI, open GUI.ipynb by jupyter notebook, then run the cells.
