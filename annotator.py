@@ -9,7 +9,7 @@ def add_coi_and_funding_prediction(df: pd.DataFrame, coi_tag: str, funding_tag: 
     :return: The modified data frame
     """
     import pickle as pkl
-    from disclosure_classifier import ClassifierWrapper
+    from statement_classifier import ClassifierWrapper
 
     with open("models/disclosure_classifier.pkl", "rb") as f:
         coi_pipeline_wrapper: ClassifierWrapper = pkl.load(f)
