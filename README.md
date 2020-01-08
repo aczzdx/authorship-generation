@@ -6,12 +6,12 @@ Given raw data with 'CSV' format, the tool could return a cleaned 'CSV' file and
 ## Introduction
 This repository generates an open source tool used to create author lists, acknowledgement pages, COI and other necessary supplementary information required by neuroscience journals.
 ## Installation
-Authorship Generation is basically built to use pandas Dataframe and some scikit modules for processing data. Thus, we recommend Anaconda Vitual Environment with Python 3.8 in order to use our tool. 
+Authorship Generation is basically built to use pandas Dataframe and some scikit modules for processing data. Thus, we recommend Anaconda Virtual Environment with Python 3.8 in order to use our tool. 
 1. Install the environment supporting for latest python:
 
     ``` conda install -c anaconda python==3.8```
 
-2. Once creating the Vitual Environment, you could use a simple ``` pip ``` command:
+2. Once creating the Virtual Environment, you could use a simple ``` pip ``` command:
 
     ```pip install <package name>```
     Python packages are including: spacy, ipywidgets, recordlinkage, sklearn, python-docx
@@ -31,7 +31,7 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
   
   To run the generation task, please run
   
-  ```  python authorship_tools.py generate config.yml   ```
+  ```  python authorship_tool.py generate config.yml   ```
   
 ## Features
 
