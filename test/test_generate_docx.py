@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv("../authors.csv")
+df = pd.read_csv("../data/authors.csv")
 from generate_docx import InitialsGenerator
 
 initial = InitialsGenerator()

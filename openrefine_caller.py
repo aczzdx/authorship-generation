@@ -14,11 +14,6 @@ from requests import Response
 PORJECT_NAME = "1234567890"
 
 
-# port = "3333"
-# OPEN_REFINE_LOCALHOST = "http://localhost:%s" % port
-# input_csv = "authors.csv"
-
-# %%
 
 
 def create_project(input_csv, port=3333):
@@ -214,6 +209,6 @@ def openrefine_reconcile(input_csv: str, column_tags: List[List[str]],
 # %%
 
 if __name__ == '__main__':
-    openrefine_reconcile("authors.csv", [
+    openrefine_reconcile("data/authors.csv", [
         ['Country', 'State', 'City (e.g.Brisbane)']
     ])

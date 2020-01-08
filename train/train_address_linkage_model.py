@@ -12,7 +12,7 @@ import sklearn
 # %% Get ground truth list
 
 df1 = pd.read_csv("../data/authors-csv-refine.csv")
-df2 = pd.read_csv("../reference.csv")
+df2 = pd.read_csv("../data/reference.csv")
 
 name = np.nan
 for tag in ['Email Address']:
