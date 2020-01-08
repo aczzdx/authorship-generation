@@ -19,7 +19,6 @@ def add_coi_and_funding_prediction(df: pd.DataFrame, coi_tag: str, funding_tag: 
         funding_pipeline_wrapper: ClassifierWrapper = pkl.load(f)
         funding_pipeline = funding_pipeline_wrapper.pipeline
 
-    # df = pd.read_csv("authors.csv")
     coi_text = df[coi_tag]
     has_coi = coi_pipeline.predict_proba(coi_text)
     df['has_coi Probability'] = has_coi[:, 1]
