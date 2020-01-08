@@ -202,7 +202,7 @@ class GenerationTab:
             self.accordion
         ])
 
-        self.start_button.on_click = lambda change: self.init_accordion()
+        self.start_button.on_click(lambda change: self.start_generation())
 
     def init_accordion(self) -> widgets.Accordion:
         """Generate the accordion for the generation tab.
@@ -226,6 +226,7 @@ class GenerationTab:
         document in docx.
         """
         debug_out.clear_output()
+        print("Generating...")
         self.generate_status_bar.value = "Generating..."
 
         mydict = self.clean_file_upload.value
@@ -325,7 +326,7 @@ class CleaningTab:
         ])
 
         self.email_go = widgets.Button(
-            description="Fund Duplicate",
+            description="Find Duplicate",
             icon="play",
             tooltip="Find Duplicate"
         )
@@ -364,7 +365,7 @@ class CleaningTab:
 
         self.open_refine_go.on_click(lambda change: self.run_openrefine())
         self.email_go.on_click(lambda change: self.email_deduplicate())
-        self.affiliation_go.on_click(lambda change: self.propose_data)
+        self.affiliation_go.on_click(lambda change: self.propose_data())
 
     def setup_accordion(self) -> widgets.Accordion:
         """ Setup for the accordion inside the cleaning tab
@@ -449,6 +450,7 @@ class CleaningTab:
         from address_linkage import DepartmentNameNormalizer
         from annotator import add_coi_and_funding_prediction
 
+        print("Proposing new data")
         mydict = self.affiliation_upload.value
         bytes_val = mydict[next(iter(mydict.keys()))]['content']
         if len(mydict) == 0:

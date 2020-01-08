@@ -9,14 +9,16 @@ import pandas as pd
 class InitialsGenerator:
     """Generate initials of author names
 
-    Extract initials from authors' first name, middle name and last name respectively and then mix them up by some characters like '.', '-'. For some special cases, rules of initials generation can be defined by users. Some examples will be shown on the UI system and users can decide how to extract and combine initials and symbols
+    Extract initials from authors' first name, middle name and last name respectively and then mix them up by some
+    characters like '.', '-'. For some special cases, rules of initials generation can be defined by users. Some
+    examples will be shown on the UI system and users can decide how to extract and combine initials and symbols
 
     """
 
     last_name_tag: str = 'Last Name'
     middle_initial_tag: str = 'Middle Initial(s)'
     first_name_tag: str = 'First Name'
-    initials_examples: Dict[str, str] = field(default_factory=lambda _: {
+    initials_examples: Dict[str, str] = field(default_factory=lambda: {
         "Xiang-Zhen": "X-Z",
         'Jun Soo': "J-S",
         'Baskin-Sommers': "B-S",
@@ -25,8 +27,6 @@ class InitialsGenerator:
     first_initial_tag: str = 'First Initial'
     last_initial_tag: str = 'Last Initial'
     initial_tag: str = 'Initial'
-
-
 
     def transform(self, df):
         """Transform authors names to initials. Given some initial examples, the form of these initials will be defined by users
@@ -233,7 +233,6 @@ class InitialsGenerator:
             l1 = ''.join(l.split())
             fn_ii.append(l1)
 
-
         # %%
         # print('Eg: Last Name: Baskin-Sommers')
         # g2 = input("Enter the initials: ")
@@ -297,7 +296,6 @@ class InitialsGenerator:
         for i in range(len(fn_ii)):
             initial = get_initial(fn_ii[i], m[i], ln_ii[i])
             l.append(initial)
-
 
         first_name = df[self.first_name_tag]
         middle_name = df[self.middle_initial_tag]
@@ -372,7 +370,6 @@ class InitialsGenerator:
         diff_flag = [not f for f in flag]
         res = data_duplication[diff_flag]
 
-
         # %%
         def test_ln_dupliction(df, fn, m, ln):
             """Test whether the generated firstname initials are the same. If the result is true, add one more letter to the first initial
@@ -403,7 +400,6 @@ class InitialsGenerator:
             return df
 
             # %%
-
 
         def test_fn_dupliction(df, fn, m, ln):
             """Test whether the generated lastname initials are the same. If the result is true, add one more letter to the last initial
@@ -458,7 +454,6 @@ class InitialsGenerator:
         part2 = get_ln_duplication_initials(res)
         test1 = part2.loc[part2[self.initial_tag].isin(find_duplication(part2, [self.initial_tag])[self.initial_tag])]
 
-
         # %%
         def get_fn_duplication_initials(res, part2):
             """
@@ -483,7 +478,6 @@ class InitialsGenerator:
             return result
 
         part3 = get_fn_duplication_initials(res, part2)
-
 
         # %%
         update_data = pd.concat([part1, part2, part3], join="inner", axis=0)
@@ -559,10 +553,8 @@ class DocGenerator:
         Initials of each author
         """
 
-
         affiliation_indices, set_of_affiliations = self.get_indices_of_affiliations(df, self.affiliation_tags)
         self.generate_doc_content(df, affiliation_indices, set_of_affiliations, initials)
-
 
     def generate_doc_content(self, df, affiliation_indices, set_of_affiliations, initials):
         """Generate the content of the doc file
@@ -654,7 +646,6 @@ class DocGenerator:
                 paragraph.add_run(author)
 
 
-
 # Passing the parameters into the generator
 def handle_generating_task(args: Namespace) -> None:
     """ The main function for generation task
@@ -704,16 +695,16 @@ def handle_generating_task(args: Namespace) -> None:
     doc_generator.generate(df, initials['Initial'])
 
     print(f"Finished! The document was generated at {doc_generator.output_file_path}")
-    
+
+
 if __name__ == '__main__':
     import sys
+
     if len(sys.argv) != 2:
         raise ValueError("Missing argument")
-    
+
     df = pd.read_csv(sys.argv[1])
     generator = InitialsGenerator()
 
     df_after = generator.transform(df)
     df_after.to_csv("initials_output.csv")
-
-    

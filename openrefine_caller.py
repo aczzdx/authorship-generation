@@ -166,7 +166,7 @@ def export_rows(project_id: Union[int, str], port=3333) -> Response:
 # %% working
 
 def openrefine_reconcile(input_csv: str, column_tags: List[List[str]],
-                         output_csv="output.csv", port=3333, limit_time=300, project_id=None):
+                         output_csv="output.csv", port=3333, limit_time=3000, project_id=None):
     port_str = str(port)
 
     try:
