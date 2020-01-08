@@ -1,9 +1,9 @@
-import pandas as pd
 import re
+
+import pandas as pd
 
 
 class InitialsGenerator:
-
     """Generate initials of author names
 
     Extract initials from authors' first name, middle name and last name respectively and then mix them up by some characters like '.', '-'. For some special cases, rules of initials generation can be defined by users. Some examples will be shown on the UI system and users can decide how to extract and combine initials and symbols
@@ -14,6 +14,9 @@ class InitialsGenerator:
         self.last_name_tag = 'Last Name'
         self.middle_initial_tag = 'Middle Initial(s)'
         self.first_name_tag = 'First Name'
+        self.first_initial_tag = 'First Initial'
+        self.last_initial_tag = 'Last Initial'
+        self.initial_tag = 'Initial'
         self.initials_examples = {
             "Xiang-Zhen": "X-Z",
             'Jun Soo': "J-S",
@@ -91,19 +94,19 @@ class InitialsGenerator:
 
             return l
 
-        fn=[]
+        fn = []
         for i in range(len(df)):
             row = df.iloc[i, :]
             l = get_first_name(row[self.first_name_tag])
             fn.append(l)
-            i=i+1
+            i = i + 1
 
-        m=[]
+        m = []
         for i in range(len(df)):
             row = df.iloc[i, :]
             l = get_middle(row[self.middle_initial_tag])
             m.append(l)
-            i=i+1
+            i = i + 1
 
         ln = []
         for i in range(len(df)):
@@ -117,7 +120,6 @@ class InitialsGenerator:
             dict1 = {'First name': fn[i], 'Middle Initial': m[i], self.last_name_tag: ln[i]}
             list1.append(dict1)
             i = i + 1
-
 
         def get_first_name_initial(first_name, test1, s1):
             """Combine initials and symbols of authors first name
@@ -184,7 +186,7 @@ class InitialsGenerator:
 
             return ln_i
 
-        #%%
+        # %%
         # in the widget version, we will specify this by the UI.
         # print('Eg: First Name: Xiang-Zhen')
         # g = input("Enter the initials: ")
@@ -217,19 +219,17 @@ class InitialsGenerator:
             if not g1[i].isalpha():
                 s1 = g1[i]
             else:
-                s1=''
+                s1 = ''
 
-        #%%
-        fn_ii=[]
+        # %%
+        fn_ii = []
         for i in range(len(df)):
-            first_name=list1[i]['First name']
-            l=''.join(get_first_name_initial(first_name,test1,s1))
-            l1=''.join(l.split( ))
+            first_name = list1[i]['First name']
+            l = ''.join(get_first_name_initial(first_name, test1, s1))
+            l1 = ''.join(l.split())
             fn_ii.append(l1)
-        print(fn_ii)
 
-
-        #%%
+        # %%
         # print('Eg: Last Name: Baskin-Sommers')
         # g2 = input("Enter the initials: ")
         g2 = self.initials_examples['Baskin-Sommers']
@@ -260,19 +260,27 @@ class InitialsGenerator:
             if not g3[i].isalpha():
                 s2 = g3[i]
             else:
-                s2=''
+                s2 = ''
 
-        #%%
+        # %%
         ln_ii = []
         for i in range(len(df)):
             last_name = list1[i][self.last_name_tag]
             l = ''.join(get_last_name_initial(last_name, test2, s2))
-            # l1=''.join(l.split( ))
-            # l=get_last_name_initial(test2,list1,s2)
             ln_ii.append(l)
 
-
         def get_initial(fn, m, ln):
+            """Get initials of each author
+
+            :param fn: string
+            First name initial of each author generated before
+            :param m: string
+            Middle name initial of each author generated before
+            :param ln: string
+            Last name initial of each author generated before
+            :return ret: string
+            Initials of each author
+            """
             ret = fn + '.'
             if not pd.isnull(m):
                 for t in range(len(m)):
@@ -285,284 +293,195 @@ class InitialsGenerator:
             initial = get_initial(fn_ii[i], m[i], ln_ii[i])
             l.append(initial)
 
-        #l=get_initial(fn_ii,m,ln_ii)
-
-        def normalize_name(name):
-            """Change the first letter of first name and last name from lower case to upper case
-            """
-            if not ' ' in name:
-                ret = name[0].upper() + name[1:].lower()
-            else:
-                ret = name
-            return ret
-
         first_name = df[self.first_name_tag]
         middle_name = df[self.middle_initial_tag]
         last_name = df[self.last_name_tag]
-
-        def find_duplicate(l):
-            """Find out authors name that has the same initials
-
-            :param l: string
-            Initials of each author
-            :return num: list
-            A list of the sequence number of duplicated initials
-            :return d_initial: list
-            A list of duplicated initials
-            """
-            duplicated = set()
-            num = []
-            d_initial = []
-            for i in range(0, len(l)):
-                if l[i] in l[i + 1:]:
-                    duplicated.add(l[i])
-            test = list(duplicated)
-            for j in range(len(l)):
-                for k in range(len(duplicated)):
-                    if l[j] == test[k]:
-                        num.append(j)
-                        d_initial.append(l[j])
-            return num, d_initial
-
-        num, d_initial = find_duplicate(l)
-
-        #%%
-        fn_find = []
-        ln_find = []
-        fni_find = []
-        lni_find = []
-        m_find = []
-        new_ln_initial = []
-        new_initial = []
-        for i in range(len(num)):
-            fn_find.append(first_name[num[i]])
-            ln_find.append(last_name[num[i]])
-            fni_find.append(fn_ii[num[i]])
-            lni_find.append(ln_ii[num[i]])
-            m_find.append(m[num[i]])
-
-        def full_name_find(fn_find, m_find, ln_find):
-            """Find out all full name that has same initials
-
-            """
-            name_find = []
-            for i in range(len(fn_find)):
-                temp_list = [fn_find[i], m_find[i], ln_find[i]]
-                temp_list = [x for x in temp_list if type(x) is str]
-                name_find.append(" ".join(temp_list))
-            return name_find
-
-        name_find = full_name_find(fn_find, m_find, ln_find)
-        #print(name_find)
-
-        def all_same_classification(name_find):
-            duplicated_name = set()
-            duplicated_name_num = []
-            duplicated_name_num2 = []
-            duplicated_name_num3 = []
-            for i in range(0, len(name_find)):
-                if name_find[i] in name_find[i + 1:]:
-                    duplicated_name.add(name_find[i])
-                    duplicated_name_num.append(i)
-            for i in range(len(name_find)):
-                for j in range(len(duplicated_name)):
-                    if name_find[i] == list(duplicated_name)[j]:
-                        duplicated_name_num3.append(i)
-            duplicated_name_num2 = list(set(duplicated_name_num3).difference(set(duplicated_name_num)))
-            return duplicated_name, duplicated_name_num, duplicated_name_num2, duplicated_name_num3
-
-        duplicated_name, duplicated_name_num, duplicated_name_num2, duplicated_name_num3 = all_same_classification(
-            name_find)
-
-        #print(duplicated_name)
-        #print(duplicated_name_num)
-        #print(duplicated_name_num2)
-        #print(duplicated_name_num3)
-
-        # %%生成完全重名的人的简称
-
-        def all_same_initials(fni_find, m_find, lni_find):
-            """Find out the initials that are exactly the same
-
-            :param fni_find:
-            :param m_find:
-            :param lni_find:
-            :return:
-            """
-            new_initial_all_part1 = []
-            new_initial_all_part2 = []
-            for i in range(len(fni_find)):
-                for j in range(len(duplicated_name_num)):
-                    if i == duplicated_name_num[j]:
-                        a = fni_find[i]
-                        b = m_find[i]
-                        c = normalize_name(lni_find[i])
-                        test = get_initial(a, b, c) + '1'
-                        new_initial_all_part1.append(test)
-
-            for i in range(len(fni_find)):
-                for j in range(len(duplicated_name_num2)):
-                    if i == duplicated_name_num2[j]:
-                        a = fni_find[i]
-                        b = m_find[i]
-                        c = normalize_name(lni_find[i])
-                        test = get_initial(a, b, c) + '2'
-                        new_initial_all_part2.append(test)
-            return new_initial_all_part1, new_initial_all_part2
-
-        new_initial_all_part1, new_initial_all_part2 = all_same_initials(fni_find, m_find, lni_find)
-        # print(new_initial_all_part1)
-        # print(duplicated_name_num)
-        # print(new_initial_all_part2)
-        # print(duplicated_name_num2)
-        # %%222222222判断姓是否重复
-        num_all = list(range(len(d_initial)))
-        duplicated_name_not_num = list(set(num_all).difference(set(duplicated_name_num3)))
-
-        def find_duplicated_last_name(duplicated_name_not_num, name_find, ln_find):
-            duplicated_name_not = []
-            duplicated_last_name_all = []
-            for i in range(len(name_find)):
-                for j in range(len(duplicated_name_not_num)):
-                    if i == duplicated_name_not_num[j]:
-                        duplicated_name_not.append(name_find[i])
-                        duplicated_last_name_all.append(normalize_name(ln_find[i]))
-            duplicated_ln = set()
-            duplicated_ln_num = []
-            duplicated_ln_num_ = []
-            for i in range(0, len(duplicated_last_name_all)):
-                if duplicated_last_name_all[i] in duplicated_last_name_all[i + 1:]:
-                    duplicated_ln.add(duplicated_last_name_all[i])
-            for i in range(len(duplicated_last_name_all)):
-                for j in range(len(duplicated_ln)):
-                    if duplicated_last_name_all[i] == list(duplicated_ln)[j]:
-                        duplicated_ln_num.append(i)
-            for i in range(len(duplicated_name_not_num)):
-                for j in range(len(duplicated_ln_num)):
-                    if duplicated_ln_num[j] == i:
-                        duplicated_ln_num_.append(duplicated_name_not_num[i])
-            # print(duplicated_ln_num_)
-            ln_duplicated = []
-            fn_duplicated = []
-            for i in range(len(ln_find)):
-                for j in range(len(duplicated_ln_num_)):
-                    if duplicated_ln_num_[j] == i:
-                        ln_duplicated.append(normalize_name(ln_find[duplicated_ln_num_[j]]))
-                        fn_duplicated.append(normalize_name(fn_find[duplicated_ln_num_[j]]))
-            # print(fn_duplicated)
-            # print(ln_duplicated)
-            return duplicated_ln_num_, fn_duplicated, ln_duplicated
-
-        duplicated_ln_num_, fn_duplicated, ln_duplicated = find_duplicated_last_name(duplicated_name_not_num, name_find,
-                                                                                     ln_find)
-        # print(duplicated_ln_num_)
-        # print(fn_duplicated)
-        # print(ln_duplicated)
-
-        # %%生成多一位的first name
-        def duplicated_first_name_initial_generation(fn_find, duplicated_ln_num_, m_find, lni_find):
-            new_fn_initial = []
-            new_initial_fn = []
-            for i in range(len(fn_find)):
-                for j in range(len(duplicated_ln_num_)):
-                    if i == duplicated_ln_num_[j]:
-                        a = normalize_name(fn_find[i])
-                        new_fn_initial = a[0] + a[1]
-                        b = m_find[i]
-                        c = normalize_name(lni_find[i])
-                        test = get_initial(new_fn_initial, b, c)
-                        new_initial_fn.append(test)
-            return new_initial_fn
-
-        new_initial_fn = duplicated_first_name_initial_generation(fn_find, duplicated_ln_num_, m_find, lni_find)
-        # print(new_initial_fn)
-        # print(duplicated_ln_num_)
-
-        # %%33333333剩下的
-
-        rem = list(set(range(0, len(fn_find))).difference(set(duplicated_name_num3 + duplicated_ln_num_)))
-
-        # %%生成多一位的last name
-        def duplicated_last_name_initial_generation(fni_find, m_find, ln_find, rem):
-            new_ln_initial = []
-            new_initial_ln = []
-            for i in range(len(ln_find)):
-                for j in range(len(rem)):
-                    if i == rem[j]:
-                        a = fni_find[i]
-                        b = m_find[i]
-                        c = normalize_name(ln_find[i])
-                        test = get_initial(a, b, c[0] + c[1])
-                        new_initial_ln.append(test)
-            return new_initial_ln
-
-        new_initial_ln = duplicated_last_name_initial_generation(fni_find, m_find, ln_find, rem)
-        # print(new_initial_ln)
-        # print(rem)
-
-        # %%
-        def num_link(duplicated_name_num, duplicated_name_num2, duplicated_ln_num_, rem, num):
-            num1 = []
-            num2 = []
-            num3 = []
-            num4 = []
-            for i in range(len(num)):
-                for j in range(len(duplicated_name_num)):
-                    if i == duplicated_name_num[j]:
-                        num1.append(num[i])
-            for i in range(len(num)):
-                for j in range(len(duplicated_name_num2)):
-                    if i == duplicated_name_num2[j]:
-                        num2.append(num[i])
-            for i in range(len(num)):
-                for j in range(len(duplicated_ln_num_)):
-                    if i == duplicated_ln_num_[j]:
-                        num3.append(num[i])
-            for i in range(len(num)):
-                for j in range(len(rem)):
-                    if i == rem[j]:
-                        num4.append(num[i])
-            return num1, num2, num3, num4
-
-        num1, num2, num3, num4 = num_link(duplicated_name_num, duplicated_name_num2, duplicated_ln_num_, rem, num)
-        # print(num1, num2, num3, num4)
-        # print(new_initial_all_part1, new_initial_all_part2, new_initial_fn, new_initial_ln)
-
-        # %%
-        def updated_initials(l, num1, num2, num3, num4, new_initial_all_part1, new_initial_all_part2, new_initial_fn,
-                             new_initial_ln):
-            num = num1 + num2 + num3 + num4
-            l_updated = new_initial_all_part1 + new_initial_all_part2 + new_initial_fn + new_initial_ln
-            for i in range(len(num)):
-                l[num[i]] = l_updated[i]
-            return l
-
-        updated_l = updated_initials(l, num1, num2, num3, num4, new_initial_all_part1, new_initial_all_part2,
-                                     new_initial_fn, new_initial_ln)
-        # print(updated_l)
-
-
-        first_name=df[self.first_name_tag]
-        middle_name=df[self.middle_initial_tag]
-        last_name=df[self.last_name_tag]
-        data={
+        data1 = {
             "First Name": first_name,
-            'Middle Initials': middle_name,
-            "Last Name" :last_name,
-            'first Initial':fn_ii,
-            'last Initial:':ln_ii,
-            'Initial':updated_l
+            'Middle Initial(s)': m,
+            "Last Name": last_name,
+            'First Initial': fn_ii,
+            'Last Initial': ln_ii,
+            'Initial': l
         }
 
-        pd.options.display.max_rows = None
-        pd.options.display.max_columns = None
+        def normalize_df(df):
+            """Normalize forms of information stored in the dataframe
+            """
+            fn = df[self.first_name_tag].tolist()
+            m = df[self.middle_initial_tag].tolist()
+            ln = df[self.last_name_tag].tolist()
+            for i in range(len(df)):
+                df[self.first_name_tag][i] = fn[i][0].upper() + fn[i][1:].lower()
+                df[self.last_name_tag][i] = ln[i][0].upper() + ln[i][1:].lower()
+                if not pd.isnull(m[i]):
+                    df[self.middle_initial_tag][i] = (''.join(list(filter(str.isalpha, m[i])))).upper()
+            return df
 
+        data = normalize_df(pd.DataFrame(data1))
 
-        #print(pd.DataFrame(data))
+        # %%
+        def find_duplication(df, tag):
+            """Find duplicated rows in the dataframe based on the features stored in tag
+
+            :param df: dataframe
+            :param tag: string
+            :return c: dataframe
+            Extracted duplicated information
+            """
+            a = df.drop_duplicates(subset=tag, keep='first')
+            b = df.drop_duplicates(subset=tag, keep=False)
+            c = a.append(b).drop_duplicates(subset=tag, keep=False)
+            return c
+
+        data_duplication = data.loc[
+            data[self.initial_tag].isin(find_duplication(data, [self.initial_tag])[self.initial_tag])]
+
+        # %%
+        def get_all_duplication_initails(df):
+            """Figure out the author whose first name and last name are exactly the same. Add '1' after the initials of the first author and add '2' after the initials of the second author
+
+            :param df: dataframe
+            Contains the information of authors who have the same initials
+            :return all_duplicated: dataframe
+            Contains the information of authors who have the same first name and last name
+            :return update: dataframe
+            Contains the information of authors who have the same first name and last name with updated initials
+            """
+            tag = [self.first_name_tag, self.last_name_tag]
+            all_duplicated = df.loc[df[self.first_name_tag].isin(find_duplication(df, tag)[self.first_name_tag])]
+            a = all_duplicated.drop_duplicates(subset=[self.initial_tag], keep='first')
+            b = all_duplicated.drop_duplicates(subset=[self.initial_tag], keep='last')
+            a[self.initial_tag] = a[self.initial_tag].map(lambda x: x + '1')
+            b[self.initial_tag] = b[self.initial_tag].map(lambda x: x + '2')
+            update = pd.concat([a, b])
+            return all_duplicated, update
+
+        all_duplication, part1 = get_all_duplication_initails(data_duplication)
+
+        # %%
+        flag = data_duplication[self.first_name_tag].isin(all_duplication[self.first_name_tag])
+        diff_flag = [not f for f in flag]
+        res = data_duplication[diff_flag]
+
+        # %%
+        def test_ln_dupliction(df, fn, m, ln):
+            """Test whether the generated firstname initials are the same. If the result is true, add one more letter to the first initial
+
+            :param df: dataframe
+            :param fn: string
+            First name of selected author
+            :param m: string
+            Middle initials of selected author
+            :param ln: string
+            Last name of selected author
+            :return df: dataframe
+            """
+            test = df.loc[df[self.initial_tag].isin(find_duplication(df, [self.initial_tag])[self.initial_tag])]
+            if not len(test) == 0:
+                num = len(test[self.first_initial_tag])
+                origin = test[self.first_initial_tag].tolist()
+                added = [x[num] for x in fn]
+                s = [origin[i] + added[i] for i in range(len(origin))]
+                l = []
+                for i in range(len(test)):
+                    initial = get_initial(s[i], m[i], ln[i])
+                    l.append(initial)
+                test[self.first_initial_tag] = [a for a in s]
+                test[self.initial_tag] = [b for b in l]
+                df.loc[test.index, self.initial_tag] = test.loc[test.index, self.initial_tag]
+                df.loc[test.index, self.first_initial_tag] = test.loc[test.index, self.first_initial_tag]
+            return df
+
+            # %%
+
+        def test_fn_dupliction(df, fn, m, ln):
+            """Test whether the generated lastname initials are the same. If the result is true, add one more letter to the last initial
+
+            :param df: dataframe
+            :param fn: string
+            First name of selected author
+            :param m: string
+            Middle initials of selected author
+            :param ln: string
+            Last name of selected author
+            :return df: dataframe
+            """
+            test = df.loc[df[self.initial_tag].isin(find_duplication(df, [self.initial_tag])[self.initial_tag])]
+            if not len(test) == 0:
+                num = len(test[self.last_initial_tag])
+                origin = test[self.last_initial_tag].tolist()
+                added = [x[num] for x in ln]
+                s = [origin[i] + added[i] for i in range(len(origin))]
+                l = []
+                for i in range(len(test)):
+                    initial = get_initial(fn[i], m[i], s[i])
+                    l.append(initial)
+                test[self.last_initial_tag] = [a for a in s]
+                test[self.initial_tag] = [b for b in l]
+                df.loc[test.index, self.initial_tag] = test.loc[test.index, self.initial_tag]
+                df.loc[test.index, self.last_initial_tag] = test.loc[test.index, self.last_initial_tag]
+            return df
+
+        # %%
+        def get_ln_duplication_initials(res):
+            """
+            Figure out the author whose last name are exactly the same. Add one more letter to its first intiails
+            """
+            tag = [self.last_name_tag]
+            lastname_duplicated = res.loc[res[self.last_name_tag].isin(find_duplication(res, tag)['Last Name'])]
+            fn = lastname_duplicated[self.first_name_tag].tolist()
+            m = lastname_duplicated[self.middle_initial_tag].tolist()
+            ln = lastname_duplicated[self.last_initial_tag].tolist()
+            s = [x[0] + x[1] for x in fn]
+            l = []
+            for i in range(len(lastname_duplicated)):
+                initial = get_initial(s[i], m[i], ln[i])
+                l.append(initial)
+            lastname_duplicated[self.first_initial_tag] = [a for a in s]
+            lastname_duplicated[self.initial_tag] = [b for b in l]
+            result = test_ln_dupliction(lastname_duplicated, fn, m, ln)
+            for i in range(5):
+                result = test_ln_dupliction(result, fn, m, ln)
+            return result
+
+        part2 = get_ln_duplication_initials(res)
+        test1 = part2.loc[part2[self.initial_tag].isin(find_duplication(part2, [self.initial_tag])[self.initial_tag])]
+
+        # %%
+        def get_fn_duplication_initials(res, part2):
+            """
+            Figure out the remaining author whose has duplicated initial. Add one more letter to its last intiail
+            """
+            flag = res[self.last_name_tag].isin(part2[self.last_name_tag])
+            diff_flag = [not f for f in flag]
+            firstname_duplicated = res[diff_flag]
+            fn = firstname_duplicated[self.first_initial_tag].tolist()
+            m = firstname_duplicated[self.middle_initial_tag].tolist()
+            ln = firstname_duplicated[self.last_name_tag].tolist()
+            s = [x[0] + x[1] for x in ln]
+            l = []
+            for i in range(len(firstname_duplicated)):
+                initial = get_initial(fn[i], m[i], s[i])
+                l.append(initial)
+            firstname_duplicated[self.last_initial_tag] = [a for a in s]
+            firstname_duplicated[self.initial_tag] = [b for b in l]
+            result = test_fn_dupliction(firstname_duplicated, fn, m, ln)
+            for i in range(5):
+                result = test_fn_dupliction(result, fn, m, ln)
+            return result
+
+        part3 = get_fn_duplication_initials(res, part2)
+
+        # %%
+        update_data = pd.concat([part1, part2, part3], join="inner", axis=0)
+        data.loc[update_data.index, :] = update_data.loc[update_data.index, :]
+
+        # print(pd.DataFrame(data))
 
         # generate_docx(l)
 
-        return pd.DataFrame(data)
+        return data
 
 
 class DocGenerator:
@@ -644,7 +563,7 @@ class DocGenerator:
 
             institution = [i_inform[i] for i in range(len(i_inform))]
             ins = list(set(institution))
-            ins.sort(key=institution.index)  # 运用索引
+            ins.sort(key=institution.index)
             num = []
             for i in range(len(y1)):
                 for j in range(len(ins)):
@@ -780,13 +699,5 @@ class DocGenerator:
                     paragraph.add_run(", ")
 
                 paragraph.add_run(author)
-
-
-if __name__ == '__main__':
-    df = pd.read_csv("enigmaPDtestwithROLES.csv")
-    generator = InitialsGenerator()
-
-    df_after = generator.transform(df)
-    df_after.to_csv("initials_output.csv")
 
 
