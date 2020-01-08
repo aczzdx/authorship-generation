@@ -14,13 +14,17 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
 2. Once creating the Virtual Environment, you could use a simple ``` pip ``` command:
 
     ```pip install <package name>```
-    Python packages are including: spacy, ipywidgets, recordlinkage, sklearn, python-docx
+    Python packages are including: spacy, ipywidgets, recordlinkage, sklearn, python-docx, pandas
 
     Or just run 
 
     ```pip install -r requirements.txt```
 
 3. Download OpenRefine 3.2 in openrefine.org
+
+4. Download the spacy trained model by running
+
+    ``` python -m spacy download en_core_web_sm ```
 
 ## Usage
 
