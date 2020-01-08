@@ -243,7 +243,7 @@ class GenerationTab:
             doc_generator.generate(df, initials['Initial'])
 
             self.generate_status_bar.value = \
-                "Finished! The document was generated at %s" % doc_generator.output_doc_filename
+                "Finished! The document was generated at %s" % doc_generator.output_file_path
 
     def setup_doc_generator(self, df: pd.DataFrame) -> DocGenerator:
         """ Construct a DocGenerator and fill in parameters into it
@@ -255,7 +255,7 @@ class GenerationTab:
         """
         doc_generator = DocGenerator()
         # FIXME: find a better way of input array
-        doc_generator.whole_name = get_labelled_input_value(self.generate_column_names.children[0])
+        doc_generator.whole_name_tag = get_labelled_input_value(self.generate_column_names.children[0])
         doc_generator.role_tag = self.generate_column_names.children[1].children[1].value
         affiliation_information = eval(get_labelled_input_value(self.generate_column_names.children[2]))
         doc_generator.affiliation_tags = [x[0] for x in affiliation_information]
@@ -263,7 +263,7 @@ class GenerationTab:
             address_combinator = AddressCombinator()
             address_combinator.tags = one_list
             df[one_list[0]] = df.apply(address_combinator.combine_address, axis=1)
-        doc_generator.output_doc_filename = get_labelled_input_value(self.generated_output_filename)
+        doc_generator.output_file_path = get_labelled_input_value(self.generated_output_filename)
         doc_generator.roles_priority = eval(
             get_labelled_input_value(self.generate_contribution_priority_order.children[0]))
         return doc_generator

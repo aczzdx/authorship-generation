@@ -1,0 +1,58 @@
+# `type` indicate what kind of operation it will run.
+# All the relevant configurations will be wrapped into
+# into a group named after the name of type.
+#
+# Currently, the valid value for `type` are the following
+#     generate, clean-openrefine, clean-address-linkage,
+#     clean-predict-statements
+type: generate
+
+# Configuration for generating a .docx file
+generate:
+
+    # The filepath to the input file, which should be a .csv vile
+    # This field is required
+    input_file_path: enigmaPDtestwithROLES.csv
+
+    # The filepath to the output file, which will be a .docx document
+    # This field is required
+    output_file_path: demo2.docx
+
+    # The name of column containing the full if args name
+    whole_name_tag: Compound Name + highest degree
+
+    # The names of columns containing the name of affiliations,
+    # which can contain multiple entries
+    affiliation_tags:
+        - Affiliation 1 Department, Institution
+
+    # The name of column containing the roles in the project
+    role_tag: Role(s)
+
+    # The order of the roles in the contribution list
+    roles_priority:
+        - Collected the data
+        - Conceived and designed the analysis
+        - Cohort co-investigator
+        - Contributed data or analysis tools
+        - Performed the analysis
+        - Cohort PI
+        - Read, edited and approved the paper
+        - Wrote the paper
+        - Analyzed the data
+
+    # The name of column containing the first name
+    first_name_tag: First Name
+
+    # The name of column containing the middle initials
+    middle_initial_tag: Middle Initial(s)
+
+    # The name of column containing the last name
+    last_name_tag: Last Name
+
+    # The initials for the given examples, see the documentation for details
+    initials_examples:
+        Xiang-Zhen: X-Z
+        Jun Soo: J-S
+        Baskin-Sommers: B-S
+        van Rooij: vR
