@@ -1,8 +1,6 @@
-import re
-
-import pandas as pd
 
 
+@dataclass()
 class InitialsGenerator:
     """Generate initials of author names
 
@@ -10,19 +8,20 @@ class InitialsGenerator:
 
     """
 
-    def __init__(self):
-        self.last_name_tag = 'Last Name'
-        self.middle_initial_tag = 'Middle Initial(s)'
-        self.first_name_tag = 'First Name'
-        self.first_initial_tag = 'First Initial'
-        self.last_initial_tag = 'Last Initial'
-        self.initial_tag = 'Initial'
-        self.initials_examples = {
-            "Xiang-Zhen": "X-Z",
-            'Jun Soo': "J-S",
-            'Baskin-Sommers': "B-S",
-            'van Rooij': "vR"
-        }
+    last_name_tag: str = 'Last Name'
+    middle_initial_tag: str = 'Middle Initial(s)'
+    first_name_tag: str = 'First Name'
+    initials_examples: Dict[str, str] = field(default_factory=lambda _: {
+        "Xiang-Zhen": "X-Z",
+        'Jun Soo': "J-S",
+        'Baskin-Sommers': "B-S",
+        'van Rooij': "vR"
+    })
+    first_initial_tag: str = 'First Initial'
+    last_initial_tag: str = 'Last Initial'
+    initial_tag: str = 'Initial'
+
+
 
     def transform(self, df):
         """Transform authors names to initials. Given some initial examples, the form of these initials will be defined by users
@@ -229,6 +228,7 @@ class InitialsGenerator:
             l1 = ''.join(l.split())
             fn_ii.append(l1)
 
+
         # %%
         # print('Eg: Last Name: Baskin-Sommers')
         # g2 = input("Enter the initials: ")
@@ -293,6 +293,7 @@ class InitialsGenerator:
             initial = get_initial(fn_ii[i], m[i], ln_ii[i])
             l.append(initial)
 
+
         first_name = df[self.first_name_tag]
         middle_name = df[self.middle_initial_tag]
         last_name = df[self.last_name_tag]
@@ -308,6 +309,7 @@ class InitialsGenerator:
         def normalize_df(df):
             """Normalize forms of information stored in the dataframe
             """
+
             fn = df[self.first_name_tag].tolist()
             m = df[self.middle_initial_tag].tolist()
             ln = df[self.last_name_tag].tolist()
@@ -329,6 +331,7 @@ class InitialsGenerator:
             :return c: dataframe
             Extracted duplicated information
             """
+
             a = df.drop_duplicates(subset=tag, keep='first')
             b = df.drop_duplicates(subset=tag, keep=False)
             c = a.append(b).drop_duplicates(subset=tag, keep=False)
@@ -364,6 +367,7 @@ class InitialsGenerator:
         diff_flag = [not f for f in flag]
         res = data_duplication[diff_flag]
 
+
         # %%
         def test_ln_dupliction(df, fn, m, ln):
             """Test whether the generated firstname initials are the same. If the result is true, add one more letter to the first initial
@@ -394,6 +398,7 @@ class InitialsGenerator:
             return df
 
             # %%
+
 
         def test_fn_dupliction(df, fn, m, ln):
             """Test whether the generated lastname initials are the same. If the result is true, add one more letter to the last initial
@@ -448,6 +453,7 @@ class InitialsGenerator:
         part2 = get_ln_duplication_initials(res)
         test1 = part2.loc[part2[self.initial_tag].isin(find_duplication(part2, [self.initial_tag])[self.initial_tag])]
 
+
         # %%
         def get_fn_duplication_initials(res, part2):
             """
@@ -473,6 +479,7 @@ class InitialsGenerator:
 
         part3 = get_fn_duplication_initials(res, part2)
 
+
         # %%
         update_data = pd.concat([part1, part2, part3], join="inner", axis=0)
         data.loc[update_data.index, :] = update_data.loc[update_data.index, :]
@@ -484,30 +491,31 @@ class InitialsGenerator:
         return data
 
 
+@dataclass()
 class DocGenerator:
     """Generate a Doc file that contains a list that contains affiliation information of each author and a list of initials combined with the sequence number of institution that represents which institution each author works for
     """
 
-    def __init__(self):
-        self.output_doc_filename = "demo2.docx"
-        self.whole_name = 'Compound Name + highest degree'
-        self.affiliation_tags = [
-            'Affiliation 1 Department, Institution',
-            'Affiliation 2 Department, Institution',
-            'Affiliation 3 Department, Institution'
-        ]
-        self.role_tag = 'Role(s)'
-        self.roles_priority = [
-            'Collected the data',
-            'Conceived and designed the analysis',
-            'Cohort co-investigator',
-            'Contributed data or analysis tools',
-            'Performed the analysis',
-            'Cohort PI',
-            'Read, edited and approved the paper',
-            'Wrote the paper',
-            'Analyzed the data'
-        ]
+    output_file_path: str = "demo2.docx"
+    whole_name_tag: str = 'Compound Name + highest degree'
+    affiliation_tags: List[str] = field(default_factory=lambda _: [
+        'Affiliation 1 Department, Institution',
+        'Affiliation 2 Department, Institution',
+        'Affiliation 3 Department, Institution'
+    ])
+
+    role_tag: str = 'Role(s)'
+    roles_priority: List[str] = field(default_factory=lambda _: [
+        'Collected the data',
+        'Conceived and designed the analysis',
+        'Cohort co-investigator',
+        'Contributed data or analysis tools',
+        'Performed the analysis',
+        'Cohort PI',
+        'Read, edited and approved the paper',
+        'Wrote the paper',
+        'Analyzed the data'
+    ])
 
     def get_indices_of_affiliations(self, df, affiliation_tags):
         """Extract indices and information of affilations in dataframe
@@ -537,7 +545,7 @@ class DocGenerator:
 
         return affiliation_indices, set_of_affiliations
 
-    def generate(self, df, initials, old_way=False):
+    def generate(self, df, initials):
         """Generate a doc file that contains the author list and initials with sequence number of following list
 
         :param df: dataframe
@@ -545,71 +553,11 @@ class DocGenerator:
         :param initials: string
         Initials of each author
         """
-        x = df[self.whole_name]
 
-        i_inform = []
 
-        if old_way:
-            y1 = df[self.affiliation_tags[0]].tolist()
-            y2 = df[self.affiliation_tags[1]].tolist()
-            y3 = df[self.affiliation_tags[2]].tolist()
+        affiliation_indices, set_of_affiliations = self.get_indices_of_affiliations(df, self.affiliation_tags)
+        self.generate_doc_content(df, affiliation_indices, set_of_affiliations, initials)
 
-            for i in range(len(df)):
-                i_inform.append(y1[i])
-                if not pd.isnull(y2[i]):
-                    i_inform.append(y2[i])
-                if not pd.isnull(y3[i]):
-                    i_inform.append(y3[i])
-
-            institution = [i_inform[i] for i in range(len(i_inform))]
-            ins = list(set(institution))
-            ins.sort(key=institution.index)
-            num = []
-            for i in range(len(y1)):
-                for j in range(len(ins)):
-                    if y1[i] == ins[j]:
-                        initials = j + 1
-                num.append(initials)
-            num1 = []
-            for i1 in range(len(y2)):
-                for j1 in range(len(ins)):
-                    if not pd.isnull(y2[i1]):
-                        if y2[i1] == ins[j1]:
-                            initials = j1 + 1
-                    else:
-                        initials = ''
-                num1.append(initials)
-            num2 = []
-            for i2 in range(len(y3)):
-                for j2 in range(len(ins)):
-                    if not pd.isnull(y3[i2]):
-                        if y3[i2] == ins[j2]:
-                            initials = j2 + 1
-                    else:
-                        initials = ''
-                num2.append(initials)
-            combine = [x[i] + ' ' + str(num[i]) + ' ' + str(num1[i]) + ' ' + str(num2[i]) for i in range(len(y1))]
-
-            # %%
-            from docx import Document
-            from docx.shared import Inches
-            document = Document()
-            document.add_heading('Authorlist', 0)
-            author_text = ''
-            p = document.add_paragraph('')
-            for i in range(len(combine)):
-                p.add_run(x[i] + ' ')
-                super_text = p.add_run(str(num[i]) + ' ' + str(num1[i]) + ' ' + str(num2[i]))
-                if not i == (len(combine) - 1):
-                    p.add_run(',')
-            document.add_paragraph('\n')
-            for j in range(len(ins)):
-                document.add_paragraph(ins[j], style='List Number')
-            document.save('demo.docx')
-
-        else:
-            affiliation_indices, set_of_affiliations = self.get_indices_of_affiliations(df, self.affiliation_tags)
-            self.generate_doc_content(df, affiliation_indices, set_of_affiliations, initials)
 
     def generate_doc_content(self, df, affiliation_indices, set_of_affiliations, initials):
         """Generate the content of the doc file
@@ -629,7 +577,7 @@ class DocGenerator:
         if self.role_tag is not None:
             self.generate_contribution_list(df, document, initials)
 
-        document.save(self.output_doc_filename)
+        document.save(self.output_file_path)
 
     def generate_authorlist(self, affiliation_indices, df, document, set_of_affiliations):
         """Add an authorlist in the exsiting doc file
@@ -645,7 +593,7 @@ class DocGenerator:
         """
         document.add_heading('Authorlist', level=2)
         p = document.add_paragraph('')
-        x = df[self.whole_name]
+        x = df[self.whole_name_tag]
         for i in range(len(affiliation_indices)):
             p.add_run(x[i])
             super_text = p.add_run(", ".join([str(affiliation_indices.loc[i, tag]) for tag in self.affiliation_tags]))
@@ -701,3 +649,66 @@ class DocGenerator:
                 paragraph.add_run(author)
 
 
+
+# Passing the parameters into the generator
+def handle_generating_task(args: Namespace) -> None:
+    """ The main function for generation task
+    :param args: The namespace for arguments
+    """
+
+    import pandas as pd
+    args_generate = args.configuration_yaml
+
+    dict_generate = args_generate.get("generate")
+    if dict_generate is None:
+        raise ValueError("Missing configuration for generation tasks")
+
+    input_file_path = dict_generate.get("input_file_path")
+    if input_file_path is None:
+        raise ValueError("Missing input filepath")
+
+    # extract args for initials_generator
+    initials_generator_arg = [
+        "first_name_tag",
+        "middle_initial_tag",
+        "last_name_tag",
+        "initials_examples"
+    ]
+
+    initials_generator_arg_dict = {key: dict_generate[key] for key in initials_generator_arg
+                                   if dict_generate[key] is not None}
+
+    initials_generator = InitialsGenerator(**initials_generator_arg_dict)
+
+    doc_generator_arg = [
+        "output_file_path",
+        "whole_name_tag",
+        "affiliation_tags",
+        "role_tag",
+        "roles_priority"
+    ]
+
+    doc_generator_arg_dict = {key: dict_generate[key] for key in doc_generator_arg
+                              if dict_generate[key] is not None}
+
+    doc_generator = DocGenerator(**doc_generator_arg_dict)
+
+    # start generating
+    df = pd.read_csv(input_file_path)
+    initials = initials_generator.transform(df)
+    doc_generator.generate(df, initials['Initial'])
+
+    print(f"Finished! The document was generated at {doc_generator.output_file_path}")
+    
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) != 2:
+        raise ValueError("Missing argument")
+    
+    df = pd.read_csv(sys.argv[1])
+    generator = InitialsGenerator()
+
+    df_after = generator.transform(df)
+    df_after.to_csv("initials_output.csv")
+
+    
