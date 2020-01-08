@@ -1,4 +1,5 @@
 import pandas as pd
+from statement_classifier import ClassifierWrapper
 
 
 def add_coi_and_funding_prediction(df: pd.DataFrame, coi_tag: str, funding_tag: str) -> pd.DataFrame:
@@ -9,13 +10,12 @@ def add_coi_and_funding_prediction(df: pd.DataFrame, coi_tag: str, funding_tag: 
     :return: The modified data frame
     """
     import pickle as pkl
-    from statement_classifier import ClassifierWrapper
 
     with open("models/disclosure_classifier.pkl", "rb") as f:
         coi_pipeline_wrapper: ClassifierWrapper = pkl.load(f)
         coi_pipeline = coi_pipeline_wrapper.pipeline
 
-    with open("models/coi_identification_model.pkl", "rb") as f:
+    with open("models/funding_classifier.pkl", "rb") as f:
         funding_pipeline_wrapper: ClassifierWrapper = pkl.load(f)
         funding_pipeline = funding_pipeline_wrapper.pipeline
 
