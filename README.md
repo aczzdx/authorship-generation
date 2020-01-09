@@ -30,7 +30,7 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
 
     ```pip install -r requirements.txt```
 
-3. Download OpenRefine 3.2 in openrefine.org
+3. Download OpenRefine 3.2 in [openrefine.org](http://openrefine.org/)
 
 4. Download the spacy trained model by running
 
