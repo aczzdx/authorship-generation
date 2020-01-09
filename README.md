@@ -57,4 +57,3 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
 ### Generating DOCX File
 - Generate authors with annotator and their affiliations.
 - Create author contributions in different group, displaying them in alphabetical order.
-- For more detail, please see demo.docx in repository
