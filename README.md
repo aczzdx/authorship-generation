@@ -10,6 +10,16 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
 1. Install the environment supporting for latest python:
 
     ``` conda install -c anaconda python==3.8```
+    
+    Or create an environment supporting for latest python(if the above method does not work well):
+    
+    ``` conda create -n py38 python==3.8```
+    
+    ``` conda activate py38```
+    
+    ``` pip install jupyter nootbook```
+    
+    ``` python3 -m IPython notebook```
 
 2. Once creating the Virtual Environment, you could use a simple ``` pip ``` command:
 
