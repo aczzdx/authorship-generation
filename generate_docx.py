@@ -1,6 +1,19 @@
+from dataclasses import dataclass, field
+from typing import Dict, List
+from argparse import Namespace
+import pandas as pd
+import re
+
+def intials_examples_default_factory():
+    return  {
+        "Xiang-Zhen": "X-Z",
+        'Jun Soo': "J-S",
+        'Baskin-Sommers': "B-S",
+        'van Rooij': "vR"
+    }
 
 
-@dataclass()
+@dataclass
 class InitialsGenerator:
     """Generate initials of author names
 
@@ -11,12 +24,7 @@ class InitialsGenerator:
     last_name_tag: str = 'Last Name'
     middle_initial_tag: str = 'Middle Initial(s)'
     first_name_tag: str = 'First Name'
-    initials_examples: Dict[str, str] = field(default_factory=lambda _: {
-        "Xiang-Zhen": "X-Z",
-        'Jun Soo': "J-S",
-        'Baskin-Sommers': "B-S",
-        'van Rooij': "vR"
-    })
+    initials_examples: Dict[str, str] = field(default_factory=intials_examples_default_factory)
     first_initial_tag: str = 'First Initial'
     last_initial_tag: str = 'Last Initial'
     initial_tag: str = 'Initial'
@@ -490,22 +498,15 @@ class InitialsGenerator:
 
         return data
 
-
-@dataclass()
-class DocGenerator:
-    """Generate a Doc file that contains a list that contains affiliation information of each author and a list of initials combined with the sequence number of institution that represents which institution each author works for
-    """
-
-    output_file_path: str = "demo2.docx"
-    whole_name_tag: str = 'Compound Name + highest degree'
-    affiliation_tags: List[str] = field(default_factory=lambda _: [
+def affilation_tags_default_factory():
+    return [
         'Affiliation 1 Department, Institution',
         'Affiliation 2 Department, Institution',
         'Affiliation 3 Department, Institution'
-    ])
+    ]
 
-    role_tag: str = 'Role(s)'
-    roles_priority: List[str] = field(default_factory=lambda _: [
+def roles_priority_default_factory():
+    return [
         'Collected the data',
         'Conceived and designed the analysis',
         'Cohort co-investigator',
@@ -515,7 +516,23 @@ class DocGenerator:
         'Read, edited and approved the paper',
         'Wrote the paper',
         'Analyzed the data'
-    ])
+    ]
+
+@dataclass
+class DocGenerator:
+    """Generate a Doc file that contains a list that contains affiliation information of each author and a list of initials combined with the sequence number of institution that represents which institution each author works for
+    """
+
+    output_file_path: str = "demo2.docx"
+    whole_name_tag: str = 'Compound Name + highest degree'
+
+
+
+    affiliation_tags: List[str] = field(default_factory=affilation_tags_default_factory)
+
+    role_tag: str = 'Role(s)'
+
+    roles_priority: List[str] = field(default_factory=roles_priority_default_factory)
 
     def get_indices_of_affiliations(self, df, affiliation_tags):
         """Extract indices and information of affilations in dataframe

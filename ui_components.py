@@ -202,7 +202,7 @@ class GenerationTab:
             self.accordion
         ])
 
-        self.start_button.on_click = lambda change: self.init_accordion()
+        self.start_button.on_click(lambda change: self.start_generation())
 
     def init_accordion(self) -> widgets.Accordion:
         """Generate the accordion for the generation tab.
@@ -227,6 +227,7 @@ class GenerationTab:
         """
         debug_out.clear_output()
         self.generate_status_bar.value = "Generating..."
+        print("generating....")
 
         mydict = self.clean_file_upload.value
         if len(mydict) == 0:

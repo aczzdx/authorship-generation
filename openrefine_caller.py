@@ -14,17 +14,24 @@ from requests import Response
 PORJECT_NAME = "1234567890"
 
 
+def get_csrf_token(port=3333):
 
+    r = requests.get(f"http://localhost:{port}/command/core/get-csrf-token")
+    return r.json()['token']
 
 def create_project(input_csv, port=3333):
-    global r
 
+    token = get_csrf_token(port)
     options = {
         "project-name": " ".join(input_csv.split(".")),
         "project-file": open(input_csv)
     }
+
+    params = {
+        'csrf_token': token
+    }
     r = requests.post("http://localhost:%s" % port + "/command/core/create-project-from-upload",
-                      files=options)
+                      files=options, params=params)
 
     project_id = re.findall(r"\?project=(\d+)", r.url)[0]
     return project_id
@@ -39,11 +46,49 @@ def get_operation_json_string(country_tag: str, state_tag: str, city_tag: str) -
                     'service': 'https://tools.wmflabs.org/openrefine-wikidata/en/api',
                     'identifierSpace': 'http://www.wikidata.org/entity/',
                     'schemaSpace': 'http://www.wikidata.org/prop/direct/',
-                    'type': {'id': 'Q6256', 'name': 'country'}, 'autoMatch': True, 'columnDetails': [],
-                    'limit': 0}, 'description': ('Reconcile cells in column %s to type Q6256' % country_tag)},
-        {'op': 'core/recon-match-best-candidates', 'engineConfig': {'facets': [], 'mode': 'row-based'},
-         'columnName': country_tag,
-         'description': ('Match each cell to its best recon candidate in column %s' % country_tag)},
+                    'type': {'id': 'Q3624078', 'name': 'sovereign state'}, 'autoMatch': True, 'columnDetails': [],
+                    'limit': 0}, 'description': ('Reconcile cells in column %s to type Q3624078' % country_tag)},
+        {
+            "op": "core/recon-match-best-candidates",
+            "engineConfig": {
+                "facets": [
+                    {
+                        "type": "list",
+                        "name": f"{country_tag}: judgment",
+                        "expression": "forNonBlank(cell.recon.judgment, v, v, if(isNonBlank(value), \"(unreconciled)\", \"(blank)\"))",
+                        "columnName": "Country",
+                        "invert": False,
+                        "omitBlank": False,
+                        "omitError": False,
+                        "selection": [
+                            {
+                                "v": {
+                                    "v": "none",
+                                    "l": "none"
+                                }
+                            }
+                        ],
+                        "selectBlank": False,
+                        "selectError": False
+                    },
+                    {
+                        "type": "range",
+                        "name": f"{country_tag}: best candidate's score",
+                        "expression": "cell.recon.best.score",
+                        "columnName": f"{country_tag}",
+                        "from": 96,
+                        "to": 101,
+                        "selectNumeric": True,
+                        "selectNonNumeric": True,
+                        "selectBlank": True,
+                        "selectError": True
+                    }
+                ],
+                "mode": "row-based"
+            },
+            "columnName": f"{country_tag}",
+            "description": "Match each cell to its best recon candidate in column Country"
+        },
         {'op': 'core/recon', 'engineConfig': {'facets': [], 'mode': 'row-based'},
          'columnName': state_tag, 'config': {'mode': 'standard-service',
                                              'service': 'https://tools.wmflabs.org/openrefine-wikidata/en/api',
@@ -54,9 +99,28 @@ def get_operation_json_string(country_tag: str, state_tag: str, city_tag: str) -
                                              'autoMatch': True, 'columnDetails': [
                 {'column': country_tag, 'propertyName': 'country', 'propertyID': 'P17'}], 'limit': 0},
          'description': 'Reconcile cells in column State or Province  (if applicable) to type Q10864048'},
-        {'op': 'core/recon-match-best-candidates', 'engineConfig': {'facets': [], 'mode': 'row-based'},
-         'columnName': state_tag,
-         'description': 'Match each cell to its best recon candidate in column State or Province  (if applicable)'},
+        {
+            "op": "core/recon-match-best-candidates",
+            "engineConfig": {
+                "facets": [
+                    {
+                        "type": "range",
+                        "name": f"{state_tag}: best candidate's score",
+                        "expression": "cell.recon.best.score",
+                        "columnName": f"{state_tag}",
+                        "from": 98,
+                        "to": 101,
+                        "selectNumeric": True,
+                        "selectNonNumeric": True,
+                        "selectBlank": True,
+                        "selectError": True
+                    }
+                ],
+                "mode": "row-based"
+            },
+            "columnName": f"{state_tag}",
+            "description": f"Match each cell to its best recon candidate in column {state_tag}"
+        },
         {'op': 'core/text-transform', 'engineConfig': {'facets': [
             {'type': 'list', 'name': '%s: judgment' % state_tag,
              'expression': 'forNonBlank(cell.recon.judgment, v, v, if(isNonBlank(value), "(unreconciled)", "(blank)"))',
@@ -74,9 +138,28 @@ def get_operation_json_string(country_tag: str, state_tag: str, city_tag: str) -
                                                      'autoMatch': True, 'columnDetails': [
                 {'column': ('%s' % country_tag), 'propertyName': 'country', 'propertyID': 'P17'}], 'limit': 0},
          'description': ('Reconcile cells in column %s to type Q7930989' % city_tag)},
-        {'op': 'core/recon-match-best-candidates', 'engineConfig': {'facets': [], 'mode': 'row-based'},
-         'columnName': city_tag,
-         'description': ('Match each cell to its best recon candidate in column %s' % city_tag)},
+        {
+            "op": "core/recon-match-best-candidates",
+            "engineConfig": {
+                "facets": [
+                    {
+                        "type": "range",
+                        "name": f"{city_tag}: best candidate's score",
+                        "expression": "cell.recon.best.score",
+                        "columnName": f"{city_tag}",
+                        "from": 99,
+                        "to": 101,
+                        "selectNumeric": True,
+                        "selectNonNumeric": True,
+                        "selectBlank": True,
+                        "selectError": True
+                    }
+                ],
+                "mode": "row-based"
+            },
+            "columnName": f"{city_tag}",
+            "description": f"Match each cell to its best recon candidate in column {city_tag}"
+        },
         {'op': 'core/recon-mark-new-topics', 'engineConfig': {'facets': [
             {'type': 'list', 'name': ('%s: judgment' % city_tag),
              'expression': 'forNonBlank(cell.recon.judgment, v, v, if(isNonBlank(value), "(unreconciled)", "(blank)"))',
@@ -94,10 +177,12 @@ def get_operation_json_string(country_tag: str, state_tag: str, city_tag: str) -
 
 # %% post our
 
-def post_operation(project_id="2334308023768", port="3333",
+def post_operation(project_id="2334308023768", port=3333,
                    payload="operations=%5B%7B%22op%22%3A%22core%2Frecon%22%2C%22engineConfig%22%3A%7B%22facets%22%3A%5B%5D%2C%22mode%22%3A%22row-based%22%7D%2C%22columnName%22%3A%22Country%22%2C%22config%22%3A%7B%22mode%22%3A%22standard-service%22%2C%22service%22%3A%22https%3A%2F%2Ftools.wmflabs.org%2Fopenrefine-wikidata%2Fen%2Fapi%22%2C%22identifierSpace%22%3A%22http%3A%2F%2Fwww.wikidata.org%2Fentity%2F%22%2C%22schemaSpace%22%3A%22http%3A%2F%2Fwww.wikidata.org%2Fprop%2Fdirect%2F%22%2C%22type%22%3A%7B%22id%22%3A%22Q6256%22%2C%22name%22%3A%22country%22%7D%2C%22autoMatch%22%3Atrue%2C%22columnDetails%22%3A%5B%5D%2C%22limit%22%3A0%7D%2C%22description%22%3A%22Reconcile+cells+in+column+Country+to+type+Q6256%22%7D%2C%7B%22op%22%3A%22core%2Frecon-match-best-candidates%22%2C%22engineConfig%22%3A%7B%22facets%22%3A%5B%5D%2C%22mode%22%3A%22row-based%22%7D%2C%22columnName%22%3A%22Country%22%2C%22description%22%3A%22Match+each+cell+to+its+best+recon+candidate+in+column+Country%22%7D%5D&engine=%7B%22facets%22%3A%5B%5D%2C%22mode%22%3A%22row-based%22%7D"):
+
+    csrf_token = get_csrf_token(port)
     url = "http://127.0.0.1:%s/command/core/apply-operations" % port
-    querystring = {"project": project_id}
+    querystring = {"project": project_id, "csrf_token": csrf_token}
     payload = payload
     headers = {
         'Connection': "keep-alive",
@@ -166,7 +251,7 @@ def export_rows(project_id: Union[int, str], port=3333) -> Response:
 # %% working
 
 def openrefine_reconcile(input_csv: str, column_tags: List[List[str]],
-                         output_csv="output.csv", port=3333, limit_time=300, project_id=None):
+                         output_csv="output.csv", port=3333, limit_time=3000, project_id=None):
     port_str = str(port)
 
     try:

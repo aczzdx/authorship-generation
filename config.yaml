@@ -26,6 +26,7 @@ generate:
     affiliation_tags:
         - Affiliation 1 Department, Institution
 
+
     # The name of column containing the roles in the project
     role_tag: Role(s)
 
@@ -56,3 +57,4 @@ generate:
         Jun Soo: J-S
         Baskin-Sommers: B-S
         van Rooij: vR
+    
