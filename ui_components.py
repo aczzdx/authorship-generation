@@ -320,13 +320,13 @@ class CleaningTab:
         self.open_refine_tab = widgets.VBox([
             self.dirty_file_upload,
             label_and_input("Refined Output Filename", text_default_value="authors_refined.csv"),
-            label_and_vertical_input("Column names for (Country, City, State)  to reconcile",
-                                     text_default_value="""[['City', 'State', 'Country']]"""),
+            label_and_vertical_input("Column names for (Country, State, City)  to reconcile",
+                                     text_default_value="""[['Country', 'State', 'City']]"""),
             widgets.HBox([self.open_refine_go, self.open_refile_status])
         ])
 
         self.email_go = widgets.Button(
-            description="Fund Duplicate",
+            description="Find Duplicate",
             icon="play",
             tooltip="Find Duplicate"
         )
@@ -354,8 +354,7 @@ class CleaningTab:
                 "Indices indicating Affiliation Information (indicating [Department, Street, City, Zip, Country] for each "
                 "sublist)"),
 
-            widgets.Textarea(value="""[[11, 12, 13, 14, 16],[17,18, 19, 20, 22],[23, 24, 25, 26, 28]]""",
-                             layout=widgets.Layout(width='600px')),
+            widgets.Textarea(value="""[[7, 8, 9, 10, 12],[13, 14, 15, 16, 18],[19, 20, 21, 22, 24]]""",layout=widgets.Layout(width='600px')),
             self.coi_input,
             self.funding_input,
             widgets.HBox([self.affiliation_go, self.affiliation_status])
@@ -365,15 +364,17 @@ class CleaningTab:
 
         self.open_refine_go.on_click(lambda change: self.run_openrefine())
         self.email_go.on_click(lambda change: self.email_deduplicate())
-        self.affiliation_go.on_click(lambda change: self.propose_data)
+        self.affiliation_go.on_click(lambda change: self.propose_data())
 
     def setup_accordion(self) -> widgets.Accordion:
         """ Setup for the accordion inside the cleaning tab
         :return: An Ipython accordion widget
         """
-        accordion_for_cleaning = widgets.Accordion([self.open_refine_tab,
-                                                    self.email_column_tags,
-                                                    self.generate_affiliations_tags])
+        accordion_for_cleaning = widgets.Accordion([
+            self.open_refine_tab,
+            self.email_column_tags,
+            self.generate_affiliations_tags
+        ])
         accordion_for_cleaning.set_title(0, "Use OpenRefine for location naming matching")
         accordion_for_cleaning.set_title(1, "Find duplicate entry")
         accordion_for_cleaning.set_title(2, "Guess the department names")

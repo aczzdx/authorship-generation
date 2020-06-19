@@ -114,7 +114,7 @@ class AddressLinkage:
 
         return df
 
-    def match_with_bloc(self, df: pd.DataFrame) -> pd.Dataframe:
+    def match_with_bloc(self, df: pd.DataFrame) -> pd.DataFrame:
         """Record linkage to all university addresses, and return a Dataframe with reference.
 
         Main function in class Addresslinkage. Index authors records by country and city,

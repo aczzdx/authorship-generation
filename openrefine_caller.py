@@ -56,7 +56,7 @@ def get_operation_json_string(country_tag: str, state_tag: str, city_tag: str) -
                         "type": "list",
                         "name": f"{country_tag}: judgment",
                         "expression": "forNonBlank(cell.recon.judgment, v, v, if(isNonBlank(value), \"(unreconciled)\", \"(blank)\"))",
-                        "columnName": "Country",
+                        "columnName": country_tag,
                         "invert": False,
                         "omitBlank": False,
                         "omitError": False,
