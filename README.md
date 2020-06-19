@@ -6,21 +6,35 @@ Given raw data with 'CSV' format, the tool could return a cleaned 'CSV' file and
 ## Introduction
 This repository generates an open source tool used to create author lists, acknowledgement pages, COI and other necessary supplementary information required by neuroscience journals.
 ## Installation
-Authorship Generation is basically built to use pandas Dataframe and some scikit modules for processing data. Thus, we recommend Anaconda Vitual Environment with Python 3.8 in order to use our tool. 
+Authorship Generation is basically built to use pandas Dataframe and some scikit modules for processing data. Thus, we recommend Anaconda Virtual Environment with Python 3.8 in order to use our tool. 
 1. Install the environment supporting for latest python:
 
     ``` conda install -c anaconda python==3.8```
+    
+    Or create an environment supporting for latest python(if the above method does not work well):
+    
+    ``` conda create -n py38 python==3.8```
+    
+    ``` conda activate py38```
+    
+    ``` pip install jupyter nootbook```
+    
+    ``` python3 -m IPython notebook```
 
-2. Once creating the Vitual Environment, you could use a simple ``` pip ``` command:
+2. Once creating the Virtual Environment, you could use a simple ``` pip ``` command:
 
     ```pip install <package name>```
-    Python packages are including: spacy, ipywidgets, recordlinkage, sklearn, python-docx
+    Python packages are including: spacy, ipywidgets, recordlinkage, sklearn, python-docx, pandas
 
     Or just run 
 
     ```pip install -r requirements.txt```
 
-3. Download OpenRefine 3.2 in openrefine.org
+3. Download OpenRefine 3.2 in [openrefine.org](http://openrefine.org/)
+
+4. Download the spacy trained model by running
+
+    ``` python -m spacy download en_core_web_sm ```
 
 ## Usage
 
@@ -31,7 +45,7 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
   
   To run the generation task, please run
   
-  ```  python authorship_tools.py generate config.yml   ```
+  ```  python authorship_tool.py generate config.yml   ```
   
 ## Features
 
@@ -43,4 +57,3 @@ Authorship Generation is basically built to use pandas Dataframe and some scikit
 ### Generating DOCX File
 - Generate authors with annotator and their affiliations.
 - Create author contributions in different group, displaying them in alphabetical order.
-- For more detail, please see demo.docx in repository

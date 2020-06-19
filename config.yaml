@@ -12,11 +12,11 @@ generate:
 
     # The filepath to the input file, which should be a .csv vile
     # This field is required
-    input_file_path: enigmaPDtestwithROLES.csv
+    input_file_path: input.csv
 
     # The filepath to the output file, which will be a .docx document
     # This field is required
-    output_file_path: demo2.docx
+    output_file_path: output.docx
 
     # The name of column containing the full if args name
     whole_name_tag: Compound Name + highest degree
@@ -25,7 +25,6 @@ generate:
     # which can contain multiple entries
     affiliation_tags:
         - Affiliation 1 Department, Institution
-
 
     # The name of column containing the roles in the project
     role_tag: Role(s)
@@ -57,4 +56,4 @@ generate:
         Jun Soo: J-S
         Baskin-Sommers: B-S
         van Rooij: vR
-    
+
